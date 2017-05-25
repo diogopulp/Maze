@@ -46,7 +46,7 @@ erro_abrir:
         mov     ah,09h
         lea     dx,Erro_Open
         int     21h
-        jmp     sai
+    ;    jmp     sai
 
 ler_ciclo:
         mov     ah,3fh			    ; indica que vai ser lido um ficheiro
@@ -71,14 +71,14 @@ fecha_ficheiro:					        ; vamos fechar o ficheiro
         mov     ah,3eh
         mov     bx,HandleFich
         int     21h
-        jnc     sai
+    ;    jnc     sai
 
         mov     ah,09h			    ; o ficheiro pode não fechar correctamente
         lea     dx,Erro_Close
         Int     21h
-sai:
-        mov     ah,4ch
-        int     21h
+;sai:
+ ;       mov     ah,4ch
+  ;      int     21h foda-se
 Main    endp
 cseg	ends
 end     Main
