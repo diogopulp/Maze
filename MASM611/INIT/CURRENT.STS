@@ -2,16 +2,16 @@
 	pmark=
 	version=3
 [debug-]
-	target="c:\aulas\ex12.exe"
-	synonym=;C:\AULAS
-	memwin=vm1b 0x0006:0x0000 
+	target="c:\demopr~1\avatar.exe"
+	synonym=;C:\DEMOPR~1
+	memwin=vm1b DS:0 
 [cv]
 	wndstate=0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1
 	wndstate=1 80 5 0 1 0 1 0 0 0 0 0 0 0 -1
 	wndstate=2 34 4 33 1 0 0 0 0 0 0 0 0 0 -1
-	wndstate=3 80 13 0 6 0 1 0 0 0 8 6 0 0 -1
+	wndstate=3 80 13 0 6 0 1 0 0 0 2173 2170 0 0 -1
 	wndstate=4 67 7 3 8 0 0 0 0 0 0 0 0 0 -1
-	wndstate=5 80 5 0 19 1 1 0 5 0 0 0 0 0 -1
+	wndstate=5 80 5 0 19 1 1 0 0 0 0 0 0 0 -1
 	wndstate=6 67 4 3 15 0 0 0 0 0 0 0 0 0 -1
 	wndstate=7 13 23 67 1 0 1 0 0 0 0 0 0 0 -1
 	wndstate=8 67 4 0 16 0 0 0 0 0 0 0 0 0 -1
