@@ -1,5 +1,5 @@
 ;--------------------------------------------------------------
-; Demostração da navegação do Ecran com um avatar
+; Demostraï¿½ï¿½o da navegaï¿½ï¿½o do Ecran com um avatar
 ;
 ;--------------------------------------------------------------
 
@@ -8,13 +8,13 @@
 .stack 2048
 
 dseg	segment para public 'data'
-		string	db	"Teste prático de T.I",0
-		Car		db	32	; Guarda um caracter do Ecran 
+		string	db	"Teste prï¿½tico de T.I",0
+		Car		db	32	; Guarda um caracter do Ecran
 		Cor		db	7	; Guarda os atributos de cor do caracter
 		POSy		db	5	; a linha pode ir de [1 .. 25]
-		POSx		db	10	; POSx pode ir [1..80]	
-		POSya		db	5	; Posição anterior de y
-		POSxa		db	10	; Posição anterior de x
+		POSx		db	10	; POSx pode ir [1..80]
+		POSya		db	5	; Posiï¿½ï¿½o anterior de y
+		POSxa		db	10	; Posiï¿½ï¿½o anterior de x
 dseg	ends
 
 cseg	segment para public 'code'
@@ -25,7 +25,7 @@ assume		cs:cseg, ds:dseg
 ;########################################################################
 goto_xy	macro		POSx,POSy
 		mov		ah,02h
-		mov		bh,0		; numero da página
+		mov		bh,0		; numero da pï¿½gina
 		mov		dl,POSx
 		mov		dh,POSy
 		int		10h
@@ -37,18 +37,19 @@ endm
 apaga_ecran	proc
 		xor		bx,bx
 		mov		cx,25*80
-		
-apaga:			mov	byte ptr es:[bx],' '
+
+apaga:
+		mov		byte ptr es:[bx],' '
 		mov		byte ptr es:[bx+1],7
 		inc		bx
-		inc 		bx
-		loop		apaga
+		inc 	bx
+		loop	apaga
 		ret
 apaga_ecran	endp
 
 
 ;########################################################################
-; LE UMA TECLA	
+; LE UMA TECLA
 
 LE_TECLA	PROC
 
@@ -69,50 +70,50 @@ Main  proc
 		mov		ds,ax
 		mov		ax,0B800h
 		mov		es,ax
-	
-		goto_xy	POSx,POSy	; Vai para nova possição
-		mov 		ah, 08h	; Guarda o Caracter que está na posição do Cursor
-		mov		bh,0		; numero da página
-		int		10h			
-		mov		Car, al	; Guarda o Caracter que está na posição do Cursor
-		mov		Cor, ah	; Guarda a cor que está na posição do Cursor	
-	
 
-CICLO:	goto_xy	POSxa,POSya	; Vai para a posição anterior do cursor
+		goto_xy	POSx,POSy	; Vai para nova possiï¿½ï¿½o
+		mov 		ah, 08h	; Guarda o Caracter que estï¿½ na posiï¿½ï¿½o do Cursor
+		mov		bh,0		; numero da pï¿½gina
+		int		10h
+		mov		Car, al	; Guarda o Caracter que estï¿½ na posiï¿½ï¿½o do Cursor
+		mov		Cor, ah	; Guarda a cor que estï¿½ na posiï¿½ï¿½o do Cursor
+
+
+CICLO:	goto_xy	POSxa,POSya	; Vai para a posiï¿½ï¿½o anterior do cursor
 		mov		ah, 02h
-		mov		dl, Car	; Repoe Caracter guardado 
-		int		21H		
-		
-		goto_xy	POSx,POSy	; Vai para nova possição
+		mov		dl, Car	; Repoe Caracter guardado
+		int		21H
+
+		goto_xy	POSx,POSy	; Vai para nova possiï¿½ï¿½o
 		mov 		ah, 08h
-		mov		bh,0		; numero da página
-		int		10h		
-		mov		Car, al	; Guarda o Caracter que está na posição do Cursor
-		mov		Cor, ah	; Guarda a cor que está na posição do Cursor
-		
-		goto_xy	78,0		; Mostra o caractr que estava na posição do AVATAR
-		mov		ah, 02h	; IMPRIME caracter da posição no canto
-		mov		dl, Car	
-		int		21H			
-	
-		goto_xy	POSx,POSy	; Vai para posição do cursor
+		mov		bh,0		; numero da pï¿½gina
+		int		10h
+		mov		Car, al	; Guarda o Caracter que estï¿½ na posiï¿½ï¿½o do Cursor
+		mov		Cor, ah	; Guarda a cor que estï¿½ na posiï¿½ï¿½o do Cursor
+
+		goto_xy	78,0		; Mostra o caractr que estava na posiï¿½ï¿½o do AVATAR
+		mov		ah, 02h	; IMPRIME caracter da posiï¿½ï¿½o no canto
+		mov		dl, Car
+		int		21H
+
+		goto_xy	POSx,POSy	; Vai para posiï¿½ï¿½o do cursor
 IMPRIME:	mov		ah, 02h
 		mov		dl, 190	; Coloca AVATAR
-		int		21H	
-		goto_xy	POSx,POSy	; Vai para posição do cursor
-		
-		mov		al, POSx	; Guarda a posição do cursor
+		int		21H
+		goto_xy	POSx,POSy	; Vai para posiï¿½ï¿½o do cursor
+
+		mov		al, POSx	; Guarda a posiï¿½ï¿½o do cursor
 		mov		POSxa, al
-		mov		al, POSy	; Guarda a posição do cursor
+		mov		al, POSy	; Guarda a posiï¿½ï¿½o do cursor
 		mov 		POSya, al
-		
+
 LER_SETA:	call 		LE_TECLA
 		cmp		ah, 1
 		je		ESTEND
 		CMP 		AL, 27	; ESCAPE
 		JE		FIM
 		jmp		LER_SETA
-		
+
 ESTEND:	cmp 		al,48h
 		jne		BAIXO
 		dec		POSy		;cima
@@ -131,16 +132,13 @@ ESQUERDA:
 
 DIREITA:
 		cmp		al,4Dh
-		jne		LER_SETA 
+		jne		LER_SETA
 		inc		POSx		;Direita
 		jmp		CICLO
 
-fim:	
+fim:
 		mov		ah,4CH
 		INT		21H
 Main	endp
 Cseg	ends
 end	Main
-
-
-		
