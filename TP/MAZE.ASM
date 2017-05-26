@@ -162,6 +162,18 @@ goto_xy	POSx,POSy	; Vai para nova possi��o
     mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
 CICLO:
+;********************************************************
+	cmp posy, 22
+		jne snake
+	mov posy, 18
+	snake:					;manter o 'x' dentro dos limites
+	
+	cmp posy, 17
+		jne fimsnake
+	mov posy, 21
+	fimsnake:
+;**********************************************************************************
+
     goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
 		mov		ah, 02h
 		mov		dl, Car	; Repoe Caracter guardado
@@ -198,6 +210,18 @@ LER_SETA:
   	je		ESTEND
   	cmp 	al, 27	; ESCAPE
   	je		FIM
+;***************************************
+; ler opcao	
+	cmp al, 32					 ; epaco
+		jne vamosveroenter
+	cmp posy, 21
+		je fim		
+	vamosveroenter:
+	cmp al, 13					;enter
+		jne estend
+	cmp posy, 21
+		je fim
+;*************************************************
   	jmp		LER_SETA
 
 ESTEND:
@@ -208,21 +232,10 @@ ESTEND:
 
 BAIXO:
     cmp		al,50h
-  	jne		ESQUERDA
+  	jne		ciclo
   	inc 		POSy		;Baixo
   	jmp		CICLO
 
-ESQUERDA:
-		cmp		al,4Bh
-		jne		DIREITA
-		dec		POSx		;Esquerda
-		jmp		CICLO
-
-DIREITA:
-		cmp		al,4Dh
-		jne		LER_SETA
-		inc		POSx		;Direita
-		jmp		CICLO
 
 fim:
 		mov		ah,4CH
