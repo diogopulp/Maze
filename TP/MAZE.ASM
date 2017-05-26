@@ -26,8 +26,8 @@ dseg    segment para public 'data'
         string	db	"Teste pr�tico de T.I",0
     		Car		db	32	; Guarda um caracter do Ecran
     		Cor		db	7	; Guarda os atributos de cor do caracter
-    		POSy		db	5	; a linha pode ir de [1 .. 25]
-    		POSx		db	10	; POSx pode ir [1..80]
+    		POSy		db	18	; a linha pode ir de [1 .. 25]
+    		POSx		db	33	; POSx pode ir [1..80]
     		POSya		db	5	; Posi��o anterior de y
     		POSxa		db	10	; Posi��o anterior de x
 
@@ -94,9 +94,11 @@ Main    Proc
     mov     ax,dseg
     mov     ds,ax
 
-;abre ficheiro
-    ;call APAGA_ECRAN
+	mov		ax,0B800h           ; Apaga
+	mov		es,ax				;	o
+	call		apaga_ecran		; Ecran
 
+	;abre ficheiro
     mov     ah,3dh			    ; vamos abrir ficheiro para leitura
     mov     al,0			      ; tipo de ficheiro
     lea     dx,Fich			    ; nome do ficheiro
@@ -136,9 +138,9 @@ fecha_ficheiro:					        ; vamos fechar o ficheiro
     int     21h
 ;    jnc     sai
 
-    mov     ah,09h			    ; o ficheiro pode não fechar correctamente
-    lea     dx,Erro_Close
-    Int     21h
+;    mov     ah,09h			    ; o ficheiro pode não fechar correctamente
+;    lea     dx,Erro_Close
+;    Int     21h
 
 
 ;sai:
