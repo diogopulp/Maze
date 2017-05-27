@@ -223,12 +223,14 @@ UM:		CMP 		AL, 49		; Tecla 1
 
 DOIS:		CMP 		AL, 50		; Tecla 2
 		JNE		TRES
-		mov		Car, 177		;CINZA 177
+		mov Car, 73 ; Define Inicio CHAR 'I'
+		;mov		Car, 177		;CINZA 177
 		jmp		CICLO
 
 TRES:		CMP 		AL, 51		; Tecla 3
 		JNE		QUATRO
-		mov		Car, 178		;CINZA 178
+		mov Car, 70; Define Fim CHAR 'F'
+		;mov		Car, 178		;CINZA 178
 		jmp		CICLO
 
 QUATRO:	CMP 		AL, 52		; Tecla 4
