@@ -166,7 +166,28 @@ Main  proc
 		dec		POSy		; linha = linha -1
 		dec		POSx		; POSx = POSx -1
 
-CICLO:	goto_xy	POSx,POSy
+CICLO:	
+		;********************************************************
+		cmp posy, 21
+			jne notdown
+		mov posy, 1
+		notdown:					;manter o y dentro dos limites
+		cmp posy, 0
+			jne notup
+		mov posy, 20
+		notup:
+		cmp posx, 0			;manter o x dentro dos limites
+			jne notleft
+		mov posx, 40
+		notleft:
+		cmp posx, 41
+			jne notright
+		mov posx, 1
+		notright:
+		
+	;**********************************************************************************
+	goto_xy	POSx,POSy
+
 IMPRIME:
 		mov		ah, 02h
 		mov		dl, Car
