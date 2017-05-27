@@ -77,7 +77,7 @@ copia:
 		mov al, byte ptr es:[bx]
 		mov	ah,	byte ptr es:[bx+1]
 		mov Buffer[si], al
-		mov BUffer[si+1], ah
+		mov Buffer[si+1], ah
 		inc bx
 		inc bx
 		inc si
@@ -124,14 +124,14 @@ CRIA_FICHEIRO PROC
 		mov	ah, 40h			; indica que vamos escrever
 
 		lea	dx, Buffer			; Vamos escrever o que estiver no endereço DX
-		mov	cx, 1300			; vamos escrever multiplos bytes duma vez só
-		;mov cx, 1
+		mov	cx, 4000			; vamos escrever multiplos bytes duma vez só
 		int	21h				; faz a escrita
 		jnc	close				; se não acontecer erro fecha o ficheiro
 
 		mov	ah, 09h
 		lea	dx, msgErrorWrite
 		int	21h
+
 		close:
 		mov	ah,3eh			; indica que vamos fechar
 		int	21h				; fecha mesmo
@@ -185,8 +185,8 @@ ZERO:		CMP 		AL, 48		; Tecla 0
 
 UM:		CMP 		AL, 49		; Tecla 1
 		JNE		DOIS
-		;mov		Car, 219		;Caracter CHEIO
-		mov Car, 120 ; x minusculo
+		mov		Car, 219		;Caracter CHEIO
+		;mov Car, 120 ; x minusculo
 		jmp		CICLO
 
 DOIS:		CMP 		AL, 50		; Tecla 2
