@@ -26,11 +26,14 @@ dseg	segment para public 'data'
 		POSx		db	10	; POSx pode ir [1..80]
 
 		GChar db 32 ; variavel para guardar o caracter
+
 		fname	db	'MAZE.TXT',0
+
 		fhandle dw	0
 		msgErrorCreate	db	"Ocorreu um erro na criacao do ficheiro!$"
 		msgErrorWrite	db	"Ocorreu um erro na escrita para ficheiro!$"
 		msgErrorClose	db	"Ocorreu um erro no fecho do ficheiro!$"
+
 
 		Buffer db 2000 dup(0) ; Inicializa um array de 2000 posições(80*25) a 0 para depois serem gravados no ficheiro
 
@@ -55,6 +58,7 @@ endm
 apaga_ecran	proc
 		xor		bx,bx
 		mov		cx,25*80
+
 
 apaga:
 		mov		byte ptr es:[bx],' '
@@ -109,8 +113,10 @@ CRIA_FICHEIRO PROC
 
 		mov	ah, 3ch			; abrir ficheiro para escrita
 		mov	cx, 00H			; tipo de ficheiro
+
 		lea	dx, fname		; dx contem endereco do nome do ficheiro
 		int	21h					; abre efectivamente e AX vai ficar com o Handle do ficheiro
+
 		jnc	escreve			; se não acontecer erro vamos escrever
 
 		mov	ah, 09h			; Aconteceu erro na leitura
@@ -123,8 +129,10 @@ CRIA_FICHEIRO PROC
 		mov	bx, ax			; para escrever BX deve conter o Handle
 		mov	ah, 40h			; indica que vamos escrever
 
+
 		lea	dx, Buffer			; Vamos escrever o que estiver no endereço DX
 		mov	cx, 4000			; vamos escrever multiplos bytes duma vez só
+
 		int	21h				; faz a escrita
 		jnc	close				; se não acontecer erro fecha o ficheiro
 
@@ -168,6 +176,7 @@ IMPRIME:
 		mov		GChar, al	; Guarda o Caracter que est� na posi��o do Cursor
 		goto_xy	POSx,POSy
 
+
 		call GUARDA_ECRA
 
 		call CRIA_FICHEIRO
@@ -185,8 +194,10 @@ ZERO:		CMP 		AL, 48		; Tecla 0
 
 UM:		CMP 		AL, 49		; Tecla 1
 		JNE		DOIS
+
 		mov		Car, 219		;Caracter CHEIO
 		;mov Car, 120 ; x minusculo
+
 		jmp		CICLO
 
 DOIS:		CMP 		AL, 50		; Tecla 2
