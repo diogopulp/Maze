@@ -166,7 +166,7 @@ Main  proc
 		dec		POSy		; linha = linha -1
 		dec		POSx		; POSx = POSx -1
 
-CICLO:	
+CICLO:
 		;********************************************************
 		cmp posy, 21
 			jne notdown
@@ -184,7 +184,7 @@ CICLO:
 			jne notright
 		mov posx, 1
 		notright:
-		
+
 	;**********************************************************************************
 	goto_xy	POSx,POSy
 
@@ -232,6 +232,7 @@ TRES:		CMP 		AL, 51		; Tecla 3
 		mov Car, 70; Define Fim CHAR 'F'
 		;mov		Car, 178		;CINZA 178
 		jmp		CICLO
+		;alterei isto
 
 QUATRO:	CMP 		AL, 52		; Tecla 4
 		JNE		NOVE
