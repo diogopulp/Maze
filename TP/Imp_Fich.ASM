@@ -19,7 +19,7 @@ dseg    segment para public 'data'
         Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
         Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
         Erro_Close      db      'Erro ao tentar fechar o ficheiro$'
-        Fich         	  db      'MAZE.TXT',0
+        Fich         	  db      'DEFM.TXT',0
         HandleFich      dw      0
         car_fich        db      ?
 dseg    ends
