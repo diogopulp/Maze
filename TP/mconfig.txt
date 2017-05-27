@@ -1,0 +1,24 @@
+
+
+    Configs
+
+
+
+                        [ ]Load Default Maze
+                        [ ]Load User Maze
+                        [ ]Create Maze
+                        [ ]Edit Maze
+			[ ]Delete Maze
+                        [ ]Back
+
+
+
+
+
+
+
+
+
+
+
+
