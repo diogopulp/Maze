@@ -19,8 +19,11 @@ dseg    segment para public 'data'
         Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
         Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
         Erro_Close      db      'Erro ao tentar fechar o ficheiro$'
+
         FichMenu         	  db      'menu.txt',0
-		FichMazeConfig db 	'mconfig.txt',0
+		    FichMazeConfig      db 	    'mconfig.txt',0
+        FichDefaultMaze     db      'maze.txt',0
+
         HandleFich      dw      0
         car_fich        db      ?
 
@@ -93,9 +96,8 @@ menuconfig proc
 		mov		ax,0B800h           ; Apaga
 		mov		es,ax				;	o
 		call		apaga_ecran		; Ecran
-		
-			;abre ficheiro
-			
+
+
 	;abre ficheiro
 		mov     ah,3dh			    ; vamos abrir ficheiro para leitura
 		mov     al,0			      ; tipo de ficheiro
@@ -161,13 +163,13 @@ menuconfig proc
 
 	CICLO:
 	;********************************************************
-	
-		
+
+
 		cmp posy, 12
 			jne snake
 		mov posy, 6
 		snake:					;manter o 'x' dentro dos limites
-		
+
 		cmp posy, 5
 			jne fimsnake
 		mov posy, 11
@@ -211,7 +213,7 @@ menuconfig proc
 		cmp 	al, 27	; ESCAPE
 		je		FIM
 	;*************************************************************************
-	; 				ler opcao	
+	; 				ler opcao
 		cmp al, 32					 ; epaco
 			jne vamosveroenter
 		cmp posy, 11 ; se o 'x' estiver no back
@@ -220,7 +222,7 @@ menuconfig proc
 		mov posy, 18
 			call menu
 		notback:
-		
+
 		vamosveroenter:
 		cmp al, 13					;enter
 			jne estend
@@ -250,8 +252,61 @@ menuconfig proc
 			int		21H
 
 
-		
+
 	menuconfig endp
+;******************************************************
+; PLAY Imprime o jogo e move o avatar
+  play proc
+
+  mov		ax,0B800h           ; Apaga
+  mov		es,ax				;	o
+  call apaga_ecran
+
+  mov     ah,3dh			; vamos abrir ficheiro para leitura
+  mov     al,0			; tipo de ficheiro
+  lea     dx,FichDefaultMaze			; nome do ficheiro
+  int     21h			; abre para leitura
+  jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+  mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+  jmp     ler_ciclo		; depois de abero vamos ler o ficheiro
+
+erro_abrir:
+  mov     ah,09h
+  lea     dx,Erro_Open
+  int     21h
+  ;jmp     sai
+
+ler_ciclo:
+  mov     ah,3fh			; indica que vai ser lido um ficheiro
+  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+  mov     cx,1			; numero de bytes a ler
+  lea     dx,car_fich		; vai ler para o local de memoria apontado por dx (car_fich)
+  int     21h				; faz efectivamente a leitura
+  jc	    erro_ler		; se carry é porque aconteceu um erro
+  cmp	    ax,0			;EOF?	verifica se já estamos no fim do ficheiro
+  je	    fecha_ficheiro	; se EOF fecha o ficheiro
+  mov     ah,02h			; coloca o caracter no ecran
+  mov	    dl,car_fich		; este é o caracter a enviar para o ecran
+  int	    21h				; imprime no ecran
+  jmp	    ler_ciclo		; continua a ler o ficheiro
+
+erro_ler:
+  mov     ah,09h
+  lea     dx,Erro_Ler_Msg
+  int     21h
+
+fecha_ficheiro:					; vamos fechar o ficheiro
+  mov     ah,3eh
+  mov     bx,HandleFich
+  int     21h
+  ret
+
+  mov     ah,09h			; o ficheiro pode não fechar correctamente
+  lea     dx,Erro_Close
+  Int     21h
+
+  play endp
+;******************************************************
 
 	menu proc
 		mov		ax,0B800h           ; Apaga
@@ -327,7 +382,7 @@ menuconfig proc
 			jne snake
 		mov posy, 18
 		snake:					;manter o 'x' dentro dos limites
-		
+
 		cmp posy, 17
 			jne fimsnake
 		mov posy, 21
@@ -371,9 +426,11 @@ menuconfig proc
 		cmp 	al, 27	; ESCAPE
 		je		FIM
 	;*************************************************************************
-	; 						ler opcao	
+	; 						ler opcao
 		cmp al, 32					 ; epaco
 			jne vamosveroenter
+    cmp posy, 18 ; se o 'x' estiver no play
+      je play
 		cmp posy, 21 ; se o 'x' estiver no exit
 			je fim
 		cmp posy, 20 ; se o 'x' estiver no maze config
@@ -381,10 +438,12 @@ menuconfig proc
 		mov posx, 25
 		mov posy, 6
 		call menuconfig
-		
+
 		vamosveroenter:
 		cmp al, 13					;enter
 			jne estend
+    cmp posy, 18 ; se o 'x' estiver no play
+      je play
 		cmp posy, 21  ; se o 'x' estiver no exit
 			je fim
 		cmp posy, 20 ; se o 'x' estiver no maze config
@@ -421,9 +480,9 @@ Main    Proc
 
     mov     ax,dseg
     mov     ds,ax
-	
+
 	call menu
-	
+
 
 Main    endp
 cseg	ends
