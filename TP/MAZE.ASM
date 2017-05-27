@@ -265,6 +265,8 @@ menuconfig proc
   mov		es,ax				;	o
   call apaga_ecran
 
+  goto_xy	MazeX,MazeY
+
   mov     ah,3dh			; vamos abrir ficheiro para leitura
   mov     al,0			; tipo de ficheiro
   lea     dx,FichDefaultMaze			; nome do ficheiro
