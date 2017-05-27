@@ -35,6 +35,9 @@ dseg    segment para public 'data'
     		POSya		db	5	; Posi��o anterior de y
     		POSxa		db	10	; Posi��o anterior de x
 
+        MazeX db 1
+        MazeY db 1
+
 dseg    ends
 
 cseg    segment para public 'code'
@@ -274,7 +277,7 @@ erro_abrir:
   mov     ah,09h
   lea     dx,Erro_Open
   int     21h
-  ;jmp     sai
+  ret
 
 ler_ciclo:
   mov     ah,3fh			; indica que vai ser lido um ficheiro
@@ -299,11 +302,80 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov     ah,3eh
   mov     bx,HandleFich
   int     21h
-  ret
 
-  mov     ah,09h			; o ficheiro pode não fechar correctamente
-  lea     dx,Erro_Close
-  Int     21h
+  mov		ax, dseg
+  mov		ds,ax
+  mov		ax,0B800h
+  mov		es,ax
+
+  goto_xy	MazeX,MazeY	; Vai para nova possi��o
+  mov 		ah, 08h	; Guarda o Caracter que est� na posi��o do Cursor
+  mov		bh,0		; numero da p�gina
+  int		10h
+  mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
+  mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+
+
+CICLO:	goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+  mov		ah, 02h
+  mov		dl, Car	; Repoe Caracter guardado
+  int		21H
+
+  goto_xy	MazeX,MazeY	; Vai para nova possi��o
+  mov 		ah, 08h
+  mov		bh,0		; numero da p�gina
+  int		10h
+  mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
+  mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+
+  goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
+  mov		ah, 02h	; IMPRIME caracter da posi��o no canto
+  mov		dl, Car
+  int		21H
+
+  goto_xy	MazeX,MazeY	; Vai para posi��o do cursor
+IMPRIME:	mov		ah, 02h
+  mov		dl, 233	; Coloca AVATAR
+  int		21H
+  goto_xy	MazeX,MazeY	; Vai para posi��o do cursor
+
+  mov		al, MazeX	; Guarda a posi��o do cursor
+  mov		POSxa, al
+  mov		al, MazeY	; Guarda a posi��o do cursor
+  mov 		POSya, al
+
+LER_SETA:	call 		LE_TECLA
+  cmp		ah, 1
+  je		ESTEND
+  CMP 		AL, 27	; ESCAPE
+  JE		FIM
+  jmp		LER_SETA
+
+ESTEND:	cmp 		al,48h
+  jne		BAIXO
+  dec		MazeY		;cima
+  jmp		CICLO
+
+BAIXO:	cmp		al,50h
+  jne		ESQUERDA
+  inc 		MazeY		;Baixo
+  jmp		CICLO
+
+ESQUERDA:
+  cmp		al,4Bh
+  jne		DIREITA
+  dec		MazeX		;Esquerda
+  jmp		CICLO
+
+DIREITA:
+  cmp		al,4Dh
+  jne		LER_SETA
+  inc		MazeX		;Direita
+  jmp		CICLO
+
+  fim:
+  		mov		ah,4CH
+  		INT		21H
 
   play endp
 ;******************************************************
