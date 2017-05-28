@@ -22,7 +22,9 @@
 dseg	segment para public 'data'
 
 		chIn db 65
-
+		oitoch db 1
+		puts1 db "Insira o nome do ficheiro:", 0 
+;***************************************************************************
 		Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
         Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
         Erro_Close      db      'Erro ao tentar fechar o ficheiro$'
@@ -40,7 +42,7 @@ dseg	segment para public 'data'
 
 		GChar db 32 ; variavel para guardar o caracter
 
-		fname	db	'MAZE.TXT',0
+		fname	db	'MAZEDEFA.TXT',0
 		FichStrg1 db 'strg1.txt', 0
 
 		fhandle dw	0
@@ -222,10 +224,15 @@ pedeNomeF proc
 	  ;      int     21h
 
 	
-	mov posy, 2   ;colocar o cursor por baixo da string
-	mov posx, 4
-
+	
+	
+	
 ;**************************************** ler teclado ************************************************
+	mov posy, 3
+	mov posx, 8
+	goto_xy	POSx,POSy
+	xor si, si ;si=0
+	mov oitoch, 1
 	CICLO:
 		mov chIn, 65 ; 
 		call 		LE_TECLA 
@@ -233,31 +240,40 @@ pedeNomeF proc
 		je		ciclo
 		CMP 		AL, 13		; enter
 			jne backspace
-		mov		ah,4CH  ;  sai do 
-		INT		21H		;   programa
+		mov fname[si], 46 ;colocar a terminaçao do fich no fim do vetor
+		inc si
+		mov fname[si], 116 ;t
+		inc si
+		mov fname[si], 120 ;x
+		inc si
+		mov fname[si], 116 ;t
+		inc si
+		mov fname[si], 0
+		ret
 		
+	
 		backspace:
-		cmp		AL, 8  ;BACKSPACE
-			jne tryagain
+			cmp		AL, 8  ;BACKSPACE
+				jne limitesup
+			cmp oitoch, 2
+				jb ciclo   ; so continua se estiver dentro do lim inferior
+			mov		ah, 02h
+			mov		dl, 8 ;backspace pa andar pa traz
+			int		21H
+			mov		ah, 02h
+			mov		dl, 32 ;espaço pa limpar
+			int		21H
+			mov		ah, 02h
+			mov		dl, 8 ;backspace pa andar pa traz
+			int		21H
+			dec oitoch
+			dec si ;anda pa traz no nomefich
+			jmp ciclo
 		
-		mov 	bl, 8  ; andar pa traz
-		mov		Car, 	bl
-		mov		ah, 02h
-		mov		dl, Car
-		int		21H 
-		mov 	bl, 8  ; andar pa traz
-		mov		Car, 	bl
-		mov		ah, 02h
-		mov		dl, Car
-		int		21H 
-		mov 	bl, 32  ; espaço, serve para limpar
-		mov		Car, 	bl
-		mov		ah, 02h
-		mov		dl, Car
-		int		21H 
-		jmp ciclo
-		
-		
+		limitesup:
+			cmp oitoch, 8     
+				ja ciclo    ; so continua se estiver dentro do lim superior
+					
 		tryagain:
 			CMP 	AL, chIn		
 				JNE		incrementar
@@ -266,7 +282,9 @@ pedeNomeF proc
 			mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 			mov		dl, Car
 			int		21H 
-			inc 	posx    ;avança cursor
+			inc oitoch
+			mov fname[si], bl  ;coloca na variavel
+			inc si
 			jmp		CICLO
 				
 		incrementar:
@@ -285,18 +303,18 @@ pedeNomeF proc
 				mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 				mov		dl, Car
 				int		21H 
-				inc 	posx    ;avança cursor
+				inc oitoch
+				mov fname[si], bl  ;coloca na variavel
+				inc si
 				jmp		CICLO
 			incrementarmin:
 				cmp chin, 122
 					je ciclo
 				inc chIn
-				jmp tryagainmin
-			
-			
+				jmp tryagainmin						
+	;*******************************************************tanta linha de codigo para conseguir escrever na cmd!!!	
+
 				
-			
-			
 		pop bx
 pedeNomeF endp
 
@@ -309,7 +327,8 @@ Main  proc
 		mov		ds,ax
 		mov		ax,0B800h
 		mov		es,ax
-
+		
+		call		pedeNomeF
 		call		apaga_ecran
 
 		;Obter a posi��o
@@ -355,9 +374,7 @@ IMPRIME:
 		je		ESTEND
 				
 		cmp al, 13  ;enter 
-			jne notPNF
-		call pedeNomeF 		;vai pedir o nome do labirinto*************
-		notPNF:
+			je fim
 
 ZERO:		CMP 		AL, 48		; Tecla 0
 		JNE		UM

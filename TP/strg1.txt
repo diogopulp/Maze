@@ -1,5 +1,5 @@
 
-	Insere o nome do labirinto			    
+	Insere o nome do labirinto:			    
 
 
 
