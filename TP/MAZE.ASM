@@ -263,7 +263,7 @@ menuconfig proc
 
   mov		ax,0B800h           ; Apaga
   mov		es,ax				;	o
-  call apaga_ecran
+  call apaga_ecran ; ecra
 
 
   goto_xy	MazeX,MazeY
@@ -349,34 +349,62 @@ IMPRIME:	mov		ah, 02h
   mov		al, MazeY	; Guarda a posi��o do cursor
   mov 		POSya, al
 
-LER_SETA:	call 		LE_TECLA
+LER_SETA:
+  call 		LE_TECLA
   cmp		ah, 1
   je		ESTEND
-  CMP 		AL, 27	; ESCAPE
-  JE		FIM
+  cmp 	AL, 27	; ESCAPE
+  je		FIM
   jmp		LER_SETA
 
-ESTEND:	cmp 		al,48h
+ESTEND:
+  cmp 	al,48h
   jne		BAIXO
   dec		MazeY		;cima
+  cmp   Car, 219 ; Parede
+  je    PAREDECIMA
   jmp		CICLO
 
-BAIXO:	cmp		al,50h
+BAIXO:
+  cmp		al,50h
   jne		ESQUERDA
-  inc 		MazeY		;Baixo
+  inc 	MazeY		;Baixo
+  cmp   Car, 219 ; Parede
+  je    PAREDEBAIXO
   jmp		CICLO
 
 ESQUERDA:
   cmp		al,4Bh
   jne		DIREITA
   dec		MazeX		;Esquerda
+  cmp   Car, 219 ; Parede
+  je    PAREDEESQUERDA
   jmp		CICLO
 
 DIREITA:
   cmp		al,4Dh
   jne		LER_SETA
   inc		MazeX		;Direita
+  cmp   Car, 219 ; Parede
+  je    PAREDEDIREITA
   jmp		CICLO
+
+PAREDECIMA:
+  inc MazeY
+  jmp CICLO
+
+PAREDEBAIXO:
+  dec MazeY
+  jmp CICLO
+
+PAREDEESQUERDA:
+  inc MazeX
+  jmp CICLO
+
+PAREDEDIREITA:
+  dec MazeX
+  jmp CICLO
+
 
   fim:
   		mov		ah,4CH
