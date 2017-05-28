@@ -391,19 +391,19 @@ DIREITA:
 
 PAREDECIMA:
   inc MazeY
-  jmp CICLO
+  call menu
 
 PAREDEBAIXO:
   dec MazeY
-  jmp CICLO
+  call menu
 
 PAREDEESQUERDA:
   inc MazeX
-  jmp CICLO
+  call menu
 
 PAREDEDIREITA:
   dec MazeX
-  jmp CICLO
+  call menu
 
 
   fim:
