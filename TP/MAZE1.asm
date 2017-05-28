@@ -23,7 +23,7 @@ dseg	segment para public 'data'
 
 		chIn db 65
 		oitoch db 1
-		puts1 db "Insira o nome do ficheiro:", 0 
+		string1 db "Insira o nome do ficheiro:", 0 
 ;***************************************************************************
 		Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
         Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
@@ -85,10 +85,10 @@ apaga:
 		ret
 apaga_ecran	endp
 
-;########################################################################
-; GUARDA ECRAN EM BUFFER
 
-GUARDA_ECRA PROC
+
+
+GUARDA_ECRA PROC   ; GUARDA ECRAN EM BUFFER ########################################################################
 		xor bx,bx
 		xor si,si
 		mov cx,25*80
@@ -122,10 +122,9 @@ LE_TECLA	PROC
 		mov		ah,1
 SAI_TECLA:	RET
 LE_TECLA	endp
-;########################################################################
-; CRIA UM FICHEIRO
 
-CRIA_FICHEIRO PROC
+
+CRIA_FICHEIRO PROC  ;########################################################################
 
 		mov	ah, 3ch			; abrir ficheiro para escrita
 		mov	cx, 00H			; tipo de ficheiro
@@ -172,64 +171,24 @@ pedeNomeF proc
 	mov		ax,0B800h
 	mov		es,ax
 	call	apaga_ecran
-	
-	
-		;abre ficheiro
-		mov     ah,3dh			    ; vamos abrir ficheiro para leitura
-		mov     al,0			      ; tipo de ficheiro
-		lea     dx,FichStrg1			    ; nome do ficheiro
-		int     21h			        ; abre para leitura
-		jc      erro_abrir		  ; pode aconter erro a abrir o ficheiro
-		mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
-		jmp     ler_ciclo		    ; depois de aberto vamos ler o ficheiro
-
-	erro_abrir:
-		mov     ah,09h
-		lea     dx,Erro_Open
-		int     21h
-	;    jmp     sai
-
-	ler_ciclo:
-		mov     ah,3fh			    ; indica que vai ser lido um ficheiro
-		mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
-		mov     cx,1			      ; numero de bytes a ler
-		lea     dx,car_fich		  ; vai ler para o local de memoria apontado por dx (car_fich)
-		int     21h				      ; faz efectivamente a leitura
-		  jc	    erro_ler		    ; se carry é porque aconteceu um erro
-		  cmp	    ax,0			      ; EOF?	verifica se já estamos no fim do ficheiro
-		  je	    fecha_ficheiro	; se EOF fecha o ficheiro
-		mov     ah,02h			    ; coloca o caracter no ecran
-		  mov	    dl,car_fich		  ; este é o caracter a enviar para o ecran
-		  int	    21h				      ; imprime no ecran
-		  jmp	    ler_ciclo		    ; continua a ler o ficheiro
-
-	erro_ler:
-		mov     ah,09h
-		lea     dx,Erro_Ler_Msg
-		int     21h
-
-	fecha_ficheiro:					        ; vamos fechar o ficheiro
-		mov     ah,3eh
-		mov     bx,HandleFich
-		int     21h
-	;    jnc     sai
-
-	;    mov     ah,09h			    ; o ficheiro pode não fechar correctamente
-	;    lea     dx,Erro_Close
-	;    Int     21h
-
-
-	;sai:
-	 ;       mov     ah,4ch
-	  ;      int     21h
-
-	
-	
-	
+		
+	mov posy, 1
+	mov posx, 1
+	goto_xy	POSx,POSy
+	xor si, si ;si=0
+	puts:
+		cmp string1[si], 0
+			je scanf
+		mov ah, 02h
+		mov dl, string1[si]
+		int 21h
+		inc si
+		jmp puts
+	scanf:	
 	
 ;**************************************** ler teclado ************************************************
-	mov posy, 3
-	mov posx, 8
+	mov posy, 2
+	mov posx, 1
 	goto_xy	POSx,POSy
 	xor si, si ;si=0
 	mov oitoch, 1
@@ -325,10 +284,11 @@ pedeNomeF endp
 Main  proc
 		mov		ax, dseg
 		mov		ds,ax
-		mov		ax,0B800h
-		mov		es,ax
 		
 		call		pedeNomeF
+		mov		ax,0B800h
+		mov		es,ax
+			
 		call		apaga_ecran
 
 		;Obter a posi��o
