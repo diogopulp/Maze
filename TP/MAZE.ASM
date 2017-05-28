@@ -265,6 +265,7 @@ menuconfig proc
   mov		es,ax				;	o
   call apaga_ecran
 
+
   goto_xy	MazeX,MazeY
 
   mov     ah,3dh			; vamos abrir ficheiro para leitura
@@ -279,6 +280,7 @@ erro_abrir:
   mov     ah,09h
   lea     dx,Erro_Open
   int     21h
+
   ret
 
 ler_ciclo:
@@ -304,6 +306,7 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov     ah,3eh
   mov     bx,HandleFich
   int     21h
+
 
   mov		ax, dseg
   mov		ds,ax

@@ -21,6 +21,8 @@
 
 dseg	segment para public 'data'
 
+		chIn db 65
+
 		Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
         Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
         Erro_Close      db      'Erro ao tentar fechar o ficheiro$'
@@ -164,9 +166,11 @@ CRIA_FICHEIRO PROC
 CRIA_FICHEIRO endp
 
 pedeNomeF proc
+	push bx
 	mov		ax,0B800h
 	mov		es,ax
 	call	apaga_ecran
+	
 	
 		;abre ficheiro
 		mov     ah,3dh			    ; vamos abrir ficheiro para leitura
@@ -216,9 +220,39 @@ pedeNomeF proc
 	;sai:
 	 ;       mov     ah,4ch
 	  ;      int     21h
+
 	
+	mov posy, 2   ;colocar o cursor por baixo da string
+	mov posx, 4
+
+;**************************************** ler teclado ***************
+	CICLO:
+		mov chIn, 65 ; 
+		call 		LE_TECLA 
+	;	cmp		ah, 1
+	;	je		ESTEND
+		CMP 		AL, 13		; enter
+			jne notenter
+		mov		ah,4CH
+		INT		21H
+		
+		notenter:
+		tryagain:
+			CMP 		AL, chIn		
+			JNE		incrementar
+			mov 	bl, chIn
+			mov		Car, 	bl
+			mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
+			mov		dl, Car
+			int		21H 
+			inc 	posx    ;avança cursor
+			jmp		CICLO
 	
-	
+		incrementar:
+			inc chIn
+			jmp tryagain
+			
+		pop bx
 pedeNomeF endp
 
 
@@ -260,11 +294,9 @@ CICLO:
 	goto_xy	POSx,POSy
 
 IMPRIME:
-		mov		ah, 02h
+		mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 		mov		dl, Car
-		int		21H ;INT 21h / AH=1 - read character from standard input, with echo,
-							;result is stored in AL. if there is no character in the keyboard buffer,
-							;the function waits until any key is pressed.
+		int		21H 	
 		mov		GChar, al	; Guarda o Caracter que est� na posi��o do Cursor
 		goto_xy	POSx,POSy
 
@@ -276,9 +308,7 @@ IMPRIME:
 		call 		LE_TECLA ;***************************
 		cmp		ah, 1
 		je		ESTEND
-		CMP 		AL, 27		; ESCAPE
-		JE		FIM
-		
+				
 		cmp al, 13  ;enter 
 			jne notPNF
 		call pedeNomeF 		;vai pedir o nome do labirinto*************
