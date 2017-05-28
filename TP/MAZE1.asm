@@ -225,21 +225,42 @@ pedeNomeF proc
 	mov posy, 2   ;colocar o cursor por baixo da string
 	mov posx, 4
 
-;**************************************** ler teclado ***************
+;**************************************** ler teclado ************************************************
 	CICLO:
 		mov chIn, 65 ; 
 		call 		LE_TECLA 
-	;	cmp		ah, 1
-	;	je		ESTEND
+		cmp		ah, 1
+		je		ciclo
 		CMP 		AL, 13		; enter
-			jne notenter
-		mov		ah,4CH
-		INT		21H
+			jne backspace
+		mov		ah,4CH  ;  sai do 
+		INT		21H		;   programa
 		
-		notenter:
+		backspace:
+		cmp		AL, 8  ;BACKSPACE
+			jne tryagain
+		
+		mov 	bl, 8  ; andar pa traz
+		mov		Car, 	bl
+		mov		ah, 02h
+		mov		dl, Car
+		int		21H 
+		mov 	bl, 8  ; andar pa traz
+		mov		Car, 	bl
+		mov		ah, 02h
+		mov		dl, Car
+		int		21H 
+		mov 	bl, 32  ; espaço, serve para limpar
+		mov		Car, 	bl
+		mov		ah, 02h
+		mov		dl, Car
+		int		21H 
+		jmp ciclo
+		
+		
 		tryagain:
-			CMP 		AL, chIn		
-			JNE		incrementar
+			CMP 	AL, chIn		
+				JNE		incrementar
 			mov 	bl, chIn
 			mov		Car, 	bl
 			mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
@@ -247,10 +268,34 @@ pedeNomeF proc
 			int		21H 
 			inc 	posx    ;avança cursor
 			jmp		CICLO
-	
+				
 		incrementar:
+			cmp chIn, 90
+				je minusculas
 			inc chIn
 			jmp tryagain
+		
+		minusculas:
+			mov 	chIn, 97
+			tryagainmin:
+				CMP 	AL, chIn		
+					JNE	incrementarmin
+				mov 	bl, chIn
+				mov		Car, 	bl
+				mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
+				mov		dl, Car
+				int		21H 
+				inc 	posx    ;avança cursor
+				jmp		CICLO
+			incrementarmin:
+				cmp chin, 122
+					je ciclo
+				inc chIn
+				jmp tryagainmin
+			
+			
+				
+			
 			
 		pop bx
 pedeNomeF endp
