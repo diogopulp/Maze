@@ -23,7 +23,7 @@ dseg	segment para public 'data'
 
 		chIn db 65
 		oitoch db 1
-		string1 db "Insira o nome do ficheiro:", 0 
+		string1 db "Insira o nome do ficheiro:", 0
 ;***************************************************************************
 		Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
         Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
@@ -84,9 +84,6 @@ apaga:
 		loop	apaga
 		ret
 apaga_ecran	endp
-
-
-
 
 GUARDA_ECRA PROC   ; GUARDA ECRAN EM BUFFER ########################################################################
 		xor bx,bx
@@ -171,7 +168,7 @@ pedeNomeF proc
 	mov		ax,0B800h
 	mov		es,ax
 	call	apaga_ecran
-		
+
 	mov posy, 1
 	mov posx, 1
 	goto_xy	POSx,POSy
@@ -184,8 +181,8 @@ pedeNomeF proc
 		int 21h
 		inc si
 		jmp puts
-	scanf:	
-	
+	scanf:
+
 ;**************************************** ler teclado ************************************************
 	mov posy, 2
 	mov posx, 1
@@ -193,8 +190,8 @@ pedeNomeF proc
 	xor si, si ;si=0
 	mov oitoch, 1
 	CICLO:
-		mov chIn, 65 ; 
-		call 		LE_TECLA 
+		mov chIn, 65 ;
+		call 		LE_TECLA
 		cmp		ah, 1
 		je		ciclo
 		CMP 		AL, 13		; enter
@@ -209,8 +206,8 @@ pedeNomeF proc
 		inc si
 		mov fname[si], 0
 		ret
-		
-	
+
+
 		backspace:
 			cmp		AL, 8  ;BACKSPACE
 				jne limitesup
@@ -228,40 +225,40 @@ pedeNomeF proc
 			dec oitoch
 			dec si ;anda pa traz no nomefich
 			jmp ciclo
-		
+
 		limitesup:
-			cmp oitoch, 8     
+			cmp oitoch, 8
 				ja ciclo    ; so continua se estiver dentro do lim superior
-					
+
 		tryagain:
-			CMP 	AL, chIn		
+			CMP 	AL, chIn
 				JNE		incrementar
 			mov 	bl, chIn
 			mov		Car, 	bl
 			mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 			mov		dl, Car
-			int		21H 
+			int		21H
 			inc oitoch
 			mov fname[si], bl  ;coloca na variavel
 			inc si
 			jmp		CICLO
-				
+
 		incrementar:
 			cmp chIn, 90
 				je minusculas
 			inc chIn
 			jmp tryagain
-		
+
 		minusculas:
 			mov 	chIn, 97
 			tryagainmin:
-				CMP 	AL, chIn		
+				CMP 	AL, chIn
 					JNE	incrementarmin
 				mov 	bl, chIn
 				mov		Car, 	bl
 				mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 				mov		dl, Car
-				int		21H 
+				int		21H
 				inc oitoch
 				mov fname[si], bl  ;coloca na variavel
 				inc si
@@ -270,10 +267,10 @@ pedeNomeF proc
 				cmp chin, 122
 					je ciclo
 				inc chIn
-				jmp tryagainmin						
-	;*******************************************************tanta linha de codigo para conseguir escrever na cmd!!!	
+				jmp tryagainmin
+	;*******************************************************tanta linha de codigo para conseguir escrever na cmd!!!
 
-				
+
 		pop bx
 pedeNomeF endp
 
@@ -284,11 +281,11 @@ pedeNomeF endp
 Main  proc
 		mov		ax, dseg
 		mov		ds,ax
-		
+
 		call		pedeNomeF
 		mov		ax,0B800h
 		mov		es,ax
-			
+
 		call		apaga_ecran
 
 		;Obter a posi��o
@@ -320,7 +317,7 @@ CICLO:
 IMPRIME:
 		mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 		mov		dl, Car
-		int		21H 	
+		int		21H
 		mov		GChar, al	; Guarda o Caracter que est� na posi��o do Cursor
 		goto_xy	POSx,POSy
 
@@ -332,8 +329,8 @@ IMPRIME:
 		call 		LE_TECLA ;***************************
 		cmp		ah, 1
 		je		ESTEND
-				
-		cmp al, 13  ;enter 
+
+		cmp al, 13  ;enter
 			je fim
 
 ZERO:		CMP 		AL, 48		; Tecla 0

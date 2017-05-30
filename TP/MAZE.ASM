@@ -16,36 +16,45 @@
 
 dseg    segment para public 'data'
 
-	chIn             db    65
-	oitoch           db    1
-	string1          db    "Insira o nome do ficheiro:", 0
-	fname	           db    'MAZEDEFA.TXT',0
-	Buffer           db    2000 dup(0) ; Inicializa um array de 2000 posições(80*25) a 0 para depois serem gravados no ficheiro
-	GChar            db    32 ; variavel para guardar o caracter
-  Erro_Open        db    'Erro ao tentar abrir o ficheiro$'
-  Erro_Ler_Msg     db    'Erro ao tentar ler do ficheiro$'
-  Erro_Close       db    'Erro ao tentar fechar o ficheiro$'
-	fhandle          dw	   0
-	msgErrorCreate   db	   "Ocorreu um erro na criacao do ficheiro!$"
-	msgErrorWrite	   db	   "Ocorreu um erro na escrita para ficheiro!$"
-	msgErrorClose	   db	   "Ocorreu um erro no fecho do ficheiro!$"
-
-  FichMenu         db    'menu.txt',0
-	FichMazeConfig   db 	 'mconfig.txt',0
   FichDefaultMaze  db    'maze.txt',0
-  HandleFich       dw    0
-  car_fich         db    ?
 
-  string	         db    "Teste pr�tico de T.I",0
-  Car		           db	   32	; Guarda um caracter do Ecran
   Cor		           db	   7	; Guarda os atributos de cor do caracter
-  POSy		         db	   18	; a linha pode ir de [1 .. 25]
-  POSx		         db	   33	; POSx pode ir [1..80]
   POSya		         db	   5	; Posi��o anterior de y
   POSxa		         db	   10	; Posi��o anterior de x
 
   MazeX            db    1
   MazeY            db    1
+
+  ;------------------VARIAVEIS DO MAZE1----------------------
+  chIn db 65
+  oitoch db 1
+  string1 db "Insira o nome do ficheiro:", 0
+
+  Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
+  Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
+  Erro_Close      db      'Erro ao tentar fechar o ficheiro$'
+  FichMenu         	  db      'menu.txt',0
+  FichMazeConfig db 	'mconfig.txt',0
+  HandleFich      dw      0
+  car_fich        db      ?
+
+  string	db	"Teste pr�tico de T.I",0
+  Car		db	32
+  POSy		db	18	; a linha pode ir de [1 .. 25]
+  POSx		db	33	; POSx pode ir [1..80]
+
+  GChar db 32 ; variavel para guardar o caracter
+
+  fname	db	'MAZEDEFA.TXT',0
+  FichStrg1 db 'strg1.txt', 0
+
+  fhandle dw	0
+  msgErrorCreate	db	"Ocorreu um erro na criacao do ficheiro!$"
+  msgErrorWrite	db	"Ocorreu um erro na escrita para ficheiro!$"
+  msgErrorClose	db	"Ocorreu um erro no fecho do ficheiro!$"
+
+
+  Buffer db 2000 dup(0) ; Inicializa um array de 2000 posições(80*25) a 0 para depois serem gravados no ficheiro
 
 dseg    ends
 
@@ -64,29 +73,43 @@ GOTO_XY MACRO		POSx,POSy
 
 ENDM
 
-APAGA_ECRAN	PROC  ; ------>LIMPA O ECRA<------
-  push bx
-	push ax
-	push cx
-  push si
-  xor bx,bx
-	mov cx,24*80
-	mov bx,160
-  mov si,bx
+apaga_ecran	proc
+		xor		bx,bx
+		mov		cx,25*80
+
+
 apaga:
-	mov	al,' '
-  mov byte ptr es:[bx],al
-	mov byte ptr es:[bx+1],7
-	inc bx
-	inc bx
-	inc si
-	loop apaga
-	pop si
-	pop cx
-	pop ax
-	pop bx
-	ret
-APAGA_ECRAN ENDP  ; ------>LIMPA O ECRA<------
+		mov		byte ptr es:[bx],' '
+		mov		byte ptr es:[bx+1],7
+		inc		bx
+		inc 	bx
+		loop	apaga
+		ret
+apaga_ecran	endp
+
+;APAGA_ECRAN	PROC  ; ------>LIMPA O ECRA<------
+  ;push bx
+	;push ax
+	;push cx
+  ;push si
+  ;xor bx,bx
+	;mov cx,24*80
+	;mov bx,160
+  ;mov si,bx
+;apaga:
+	;mov	al,' '
+  ;mov byte ptr es:[bx],al
+	;mov byte ptr es:[bx+1],7
+	;inc bx
+	;inc bx
+	;inc si
+	;loop apaga
+	;pop si
+	;pop cx
+	;pop ax
+	;pop bx
+	;ret
+;APAGA_ECRAN ENDP  ; ------>LIMPA O ECRA<------
 
 
 GUARDA_ECRA PROC   ; ------>GUARDA ECRA NO BUFFER<------
@@ -152,10 +175,10 @@ scanf:
 
 CICLO:
 	mov chIn, 65 ;
-	call 		LE_TECLA
-	cmp		ah, 1
-	je		ciclo
-	CMP 		AL, 13		; enter
+	call	LE_TECLA
+	cmp	ah, 1
+	je	ciclo
+	cmp al, 13		; enter
 	jne backspace
 	mov fname[si], 46 ;colocar a terminaçao do fich no fim do vetor
 	inc si
@@ -273,9 +296,9 @@ close:
 
 CRIA_FICHEIRO ENDP  ; ------>CRIA UM FICHEIRO<------
 
-
 MENUDESENHAR PROC  ;##########################----CRIACAO DE LABIRINTO---####################################
-		call pedeNomeF
+
+    call pedeNomeF
 		mov		ax,0B800h
 		mov		es,ax
 		call		apaga_ecran
@@ -311,25 +334,25 @@ notright:
 	goto_xy	POSx,POSy
 
 IMPRIME:
-		mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-		mov		dl, Car
-		int		21H
-		mov		GChar, al	; Guarda o Caracter que est� na posi��o do Cursor
-		goto_xy	POSx,POSy
+	mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
+	mov		dl, Car
+	int		21H
+	mov		GChar, al	; Guarda o Caracter que est� na posi��o do Cursor
+	goto_xy	POSx,POSy
 
-	;	call GUARDA_ECRA
+	call GUARDA_ECRA
 
-		call CRIA_FICHEIRO
+	call CRIA_FICHEIRO
 
-		call 		LE_TECLA ;***************************
-		cmp		ah, 1
-		je		ESTEND
+	call 		LE_TECLA ;***************************
+	cmp		ah, 1
+	je		ESTEND
 
-		cmp al, 13  ;enter
-			jne zero
-		mov posx, 25 ;colocar o x no sitio onde vai aparece os menus
-		mov posy, 6
-		ret
+	cmp al, 13  ;enter
+		jne zero
+	mov posx, 25 ;colocar o x no sitio onde vai aparece os menus
+	mov posy, 6
+	ret
 
 
 ZERO:
@@ -611,6 +634,7 @@ CICLO:	goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
   int		21H
 
   goto_xy	MazeX,MazeY	; Vai para posi��o do cursor
+
 IMPRIME:	mov		ah, 02h
   mov		dl, 233	; Coloca AVATAR
   int		21H
@@ -676,7 +700,6 @@ PAREDEESQUERDA:
 PAREDEDIREITA:
   dec MazeX
   call menu
-
 
 fim:
 	mov		ah,4CH
@@ -804,6 +827,7 @@ LER_SETA:
 	mov posy, 6
 	call menuconfig
 	jmp inicio
+
 ;*************************************
 	jmp		LER_SETA
 
@@ -819,7 +843,6 @@ BAIXO:
 	inc 		POSy		;Baixo
 	jmp		CICLO
 
-
 fim:
 		mov		ah,4CH
 		int		21H
@@ -830,6 +853,8 @@ MENU ENDP ;##########################----MENU PRINCIPAL---######################
 MAIN PROC ;###############################----MAIN---#########################################
   mov     ax,DSEG
   mov     ds,ax
+
+  ;call MENUDESENHAR
 
   call MENU
 
