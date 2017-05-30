@@ -18,6 +18,9 @@ dseg    segment para public 'data'
 
   FichDefaultMaze  db    'maze.txt',0
 
+  fname db 390 dup(?) ;vetor de strings, 30*13  30strings de 12+1 char
+  fnameptr dw 0 ;ponteiro para o fname
+  fnameop db 0 ; fname option, começa a 0 que é o default
   Cor		           db	   7	; Guarda os atributos de cor do caracter
   POSya		         db	   5	; Posi��o anterior de y
   POSxa		         db	   10	; Posi��o anterior de x
@@ -28,7 +31,8 @@ dseg    segment para public 'data'
   ;------------------VARIAVEIS DO MAZE1----------------------
   chIn db 65
   oitoch db 1
-  string1 db "Insira o nome do ficheiro:", 0
+  string1 db "Type maze name:", 0
+  string2 db "Choose your maze:", 0
 
   Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
   Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
@@ -45,8 +49,6 @@ dseg    segment para public 'data'
 
   GChar db 32 ; variavel para guardar o caracter
 
-  fname	db	'MAZEDEFA.TXT',0
-  FichStrg1 db 'strg1.txt', 0
 
   fhandle dw	0
   msgErrorCreate	db	"Ocorreu um erro na criacao do ficheiro!$"
@@ -170,89 +172,91 @@ scanf:
 	mov posy, 2
 	mov posx, 1
 	goto_xy	POSx,POSy
-	xor si, si ;si=0
+	mov si, fnameptr
 	mov oitoch, 1
 
-CICLO:
-	mov chIn, 65 ;
-	call	LE_TECLA
-	cmp	ah, 1
-	je	ciclo
-	cmp al, 13		; enter
-	jne backspace
-	mov fname[si], 46 ;colocar a terminaçao do fich no fim do vetor
-	inc si
-	mov fname[si], 116 ;t
-	inc si
-	mov fname[si], 120 ;x
-	inc si
-	mov fname[si], 116 ;t
-	inc si
-	mov fname[si], 0
-	ret
+	CICLO:
+		mov chIn, 65 ;
+		call	LE_TECLA
+		cmp	ah, 1
+		je	ciclo
+		cmp al, 13		; enter
+		jne backspace
+		mov fname[si], 46 ;colocar a terminaçao do fich no fim do vetor
+		inc si
+		mov fname[si], 116 ;t
+		inc si
+		mov fname[si], 120 ;x
+		inc si
+		mov fname[si], 116 ;t
+		inc si
+		mov fname[si], 0
+		inc si
+		mov fnameptr, si
+		ret
 
-backspace:
-	cmp		AL, 8  ;BACKSPACE
-	jne limitesup
-	cmp oitoch, 2
-	jb ciclo   ; so continua se estiver dentro do lim inferior
-	mov		ah, 02h
-	mov		dl, 8 ;backspace pa andar pa traz
-	int		21H
-	mov		ah, 02h
-	mov		dl, 32 ;espaço pa limpar
-	int		21H
-	mov		ah, 02h
-	mov		dl, 8 ;backspace pa andar pa traz
-	int		21H
-	dec oitoch
-	dec si ;anda pa traz no nomefich
-	jmp ciclo
+	backspace:
+		cmp		AL, 8  ;BACKSPACE
+		jne limitesup
+		cmp oitoch, 2
+		jb ciclo   ; so continua se estiver dentro do lim inferior
+		mov		ah, 02h
+		mov		dl, 8 ;backspace pa andar pa traz
+		int		21H
+		mov		ah, 02h
+		mov		dl, 32 ;espaço pa limpar
+		int		21H
+		mov		ah, 02h
+		mov		dl, 8 ;backspace pa andar pa traz
+		int		21H
+		dec oitoch
+		dec si ;anda pa traz no nomefich
+		jmp ciclo
 
-limitesup:
-	cmp oitoch, 8
-	ja ciclo    ; so continua se estiver dentro do lim superior
+	limitesup:
+		cmp oitoch, 8
+		ja ciclo    ; so continua se estiver dentro do lim superior
 
-tryagain:
-	cmp al, chIn
-	jne	incrementar
-	mov bl, chIn
-	mov	Car, 	bl
-	mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-	mov	dl, Car
-	int	21H
-	inc oitoch
-	mov fname[si], bl  ;coloca na variavel
-	inc si
-	jmp	CICLO
+	tryagain:
+		cmp al, chIn
+		jne	incrementar
+		mov bl, chIn
+		mov	Car, 	bl
+		mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
+		mov	dl, Car
+		int	21H
+		inc oitoch
+		mov fname[si], bl  ;coloca na variavel
+		inc si
+		jmp	CICLO
 
-incrementar:
-	cmp chIn, 90
-	je minusculas
-	inc chIn
-	jmp tryagain
+	incrementar:
+		cmp chIn, 90
+		je minusculas
+		inc chIn
+		jmp tryagain
 
-minusculas:
-	mov 	chIn, 97
+	minusculas:
+		mov 	chIn, 97
 
-tryagainmin:
-	cmp	al, chIn
-	jne	incrementarmin
-	mov bl, chIn
-	mov	Car, 	bl
-	mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-	mov	dl, Car
-	int	21H
-	inc oitoch
-	mov fname[si], bl  ;coloca na variavel
-	inc si
-	jmp	CICLO
+	tryagainmin:
+		cmp	al, chIn
+		jne	incrementarmin
+		mov bl, chIn
+		mov	Car, 	bl
+		mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
+		mov	dl, Car
+		int	21H
+		inc oitoch
+		mov fname[si], bl  ;coloca na variavel
+		inc si
+		jmp	CICLO
 
-incrementarmin:
-	cmp chin, 122
-	je ciclo
-	inc chIn
-	jmp tryagainmin
+	incrementarmin:
+		cmp chin, 122
+		je ciclo
+		inc chIn
+		jmp tryagainmin
 
 PEDENOMEF ENDP ; ------>PEDE NOME PARA SER ATRIBUIDO AO FICHEIRO<------
 
@@ -260,8 +264,16 @@ CRIA_FICHEIRO PROC  ; ------>CRIA UM FICHEIRO<------
 
   mov	ah, 3ch			; abrir ficheiro para escrita
 	mov	cx, 00H			; tipo de ficheiro
-
-	lea	dx, fname		; dx contem endereco do nome do ficheiro
+	
+	mov si, fnameptr ; vamos descrobrir onde começa o ultimo nome inserido -------------------
+	dec si
+	ciclo:  		
+		dec si
+		cmp fname[si], 0
+			jne ciclo
+	inc si
+	
+	lea	dx, fname[si]		; dx contem endereco do nome do ficheiro
 	int	21h					; abre efectivamente e AX vai ficar com o Handle do ficheiro
 
 	jnc	escreve			; se não acontecer erro vamos escrever
@@ -413,6 +425,57 @@ DIREITA:
 
 MENUDESENHAR ENDP ;##########################----CRIACAO DE LABIRINTO---####################################
 
+	
+menuLoadUmaze proc   ;##########################----carregar labirinto---####################################
+
+	call apaga_ecran
+	mov posy, 1
+	mov posx, 1
+	goto_xy	POSx,POSy
+	xor si, si ;si=0
+
+	titulo:
+		cmp string2[si], 0
+		je mazesinic
+		mov ah, 02h
+		mov dl, string2[si]
+		int 21h
+		inc si
+		jmp titulo
+		
+	mazesinic:
+		mov posy, 2
+		mov posx, 2
+		goto_xy	POSx,POSy
+		xor si, si ;si=0
+	mazes:
+		cmp fnameptr, si
+			je lerOp
+		cmp fname[si], 0
+			jne notnline
+		inc posy
+		goto_xy	POSx,POSy
+		inc si
+		jmp mazes
+		notnline:
+			mov ah, 02h
+			mov dl, fname[si]
+			int 21h
+			inc si
+			jmp mazes
+	
+	lerOp:
+	
+	
+	
+		call 	le_tecla
+		cmp 	al, 27	 ; ESCAPE
+			jne		mazes
+		mov		ah,4CH ;fim
+		int		21H
+
+menuLoadUmaze endp   ;##########################----carregar labirinto---####################################
+
 MENUCONFIG PROC  ;##########################----MENU DE CONFIGURACAO---####################################
 inicio:
 	mov		ax,0B800h       ; Apaga
@@ -530,11 +593,19 @@ LER_SETA:
 
 createmaze:
   cmp posy, 8  ; se o 'x' estiver no create maze
-	jne editmaze
-	call menuDesenhar ; Call MenuDesenha PROC
-	jmp inicio
+	jne loadUserMaze
+  call menuDesenhar ; Call MenuDesenhar PROC
+  jmp inicio
 
-editmaze:
+loadUserMaze:
+	cmp posy, 7 ;se o x estiver no load user maze
+		jne loadDefaultMaze
+	call menuLoadUmaze
+	jmp inicio
+	
+loadDefaultMaze:
+
+	
 	jmp		LER_SETA
 
 ESTEND:
