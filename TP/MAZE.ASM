@@ -7,7 +7,7 @@
 ; TRABALHO REALIZADO POR:
 ;
 ; DIOGO MIGUEL BRANCO SANTOS - 21210835
-; JOÃO GASPAR - 2120
+; JOÃO FILIPE LOPES GASPAR - 21200069
 
 
 .8086
@@ -23,6 +23,8 @@ dseg    segment para public 'data'
   fnameop db 0 ; fname option, começa a 0 que é o default
   fnamen db 0	; n elementos do fname
   p db 0 ; ponteiro
+  pant db 0
+  zeros db 0
   fnameopen db 13 dup(?)
   Cor		           db	   7	; Guarda os atributos de cor do caracter
   POSya		         db	   5	; Posi��o anterior de y
@@ -36,6 +38,8 @@ dseg    segment para public 'data'
   oitoch db 1
   string1 db "Type maze name:", 0
   string2 db "Choose your maze:", 0
+  string3 db "Default Maze has been choosen!", 0
+  string4 db "Delete Maze:", 0
 
   Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
   Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
@@ -183,7 +187,7 @@ scanf:
 		call	LE_TECLA
 		cmp	ah, 1
 			je	ciclo
-		cmp al, 13		; enter
+		cmp al, 13		; enter--------------------------------------
 			jne backspace
 		mov fname[si], 46 ;colocar a terminaçao do fich no fim do vetor
 		inc si
@@ -556,7 +560,7 @@ menuLoadUmaze proc   ;##########################----carregar labirinto---#######
 				call 	le_tecla
 				cmp		ah, 1
 					je		ESTEND
-				cmp al, 13		 ;enter--------------------------
+				cmp al, 13		 ;enter--------------------------------------
 					jne estend
 				mov al, fnamen
 				add al, 3	; +3 onde começa
@@ -584,6 +588,191 @@ menuLoadUmaze proc   ;##########################----carregar labirinto---#######
 		
 
 menuLoadUmaze endp   ;##########################----carregar labirinto---####################################
+
+
+
+menuDeleteMaze proc   ;##########################----apagar labirintos---####################################
+	inicio:
+	call apaga_ecran
+	mov posy, 2
+	mov posx, 8
+	goto_xy	POSx,POSy
+	xor si, si ;si=0
+
+	titulo:
+		cmp string4[si], 0
+			je mazesinic
+		mov ah, 02h
+		mov dl, string4[si]
+		int 21h
+		inc si
+		jmp titulo
+		
+	mazesinic:
+		mov posy, 3
+		mov posx, 20
+		goto_xy	POSx,POSy
+		mov ah, 02h
+		mov dl, 91 ;[
+		int 21h
+		mov ah, 02h
+		mov dl, 32 ; espaco
+		int 21h
+		mov ah, 02h
+		mov dl, 93 ;]
+		int 21h
+		xor si, si ;si=0
+	mazes:
+		
+		cmp fname[si], 0
+			jne notnline
+		cmp fnameptr, si
+			je lerOp
+		inc posy
+		goto_xy	POSx,POSy
+		inc si
+		mov ah, 02h
+		mov dl, 91 ;[
+		int 21h
+		mov ah, 02h
+		mov dl, 32 ; espaco
+		int 21h
+		mov ah, 02h
+		mov dl, 93 ;]
+		int 21h
+		jmp mazes
+		notnline:
+			mov ah, 02h
+			mov dl, fname[si]
+			int 21h
+			inc si
+			jmp mazes
+	
+	lerOp:
+	
+		mov ah, 02h
+		mov dl, 66 ; b
+		int 21h
+		mov ah, 02h
+		mov dl, 65 ; a
+		int 21h
+		mov ah, 02h
+		mov dl, 67 ; c
+		int 21h
+		mov ah, 02h
+		mov dl, 75 ; k
+		int 21h
+		mov posy, 3
+		mov posx, 21  ;meter o x dentro do []
+		goto_xy	POSx,POSy
+		
+		CICLO:
+			mov al, fnamen
+			add al, 4  ;  
+			cmp posy, al 
+				jne snake
+			mov posy, 3 ;posicao inicial
+
+			snake:					;manter o 'x' dentro dos limites
+				cmp posy, 2
+					jne fimsnake
+				dec al
+				mov posy, al
+
+			fimsnake:
+			;**************************************
+				
+				goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+				
+				mov		ah, 02h
+				mov		dl, Car	; Repoe Caracter guardado
+				int		21H
+
+				goto_xy	POSx,POSy	; Vai para nova possi��o
+				mov 	ah, 08h
+				mov		bh,0		; numero da p�gina
+				int		10h
+				mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
+				mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+
+				goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
+				mov		ah, 02h	; IMPRIME caracter da posi��o no canto
+				mov		dl, Car
+				int		21H
+
+				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+
+			IMPRIME:
+				mov		ah, 02h
+				mov		dl, 120	; Coloca AVATAR x -> 120
+				int		21H
+				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+
+				mov		al, POSx	; Guarda a posi��o do cursor
+				mov		POSxa, al
+				mov		al, POSy	; Guarda a posi��o do cursor
+				mov 	POSya, al
+
+			LER_SETA:
+				call 	le_tecla
+				cmp		ah, 1
+					je		ESTEND
+				cmp al, 13		 ;enter--------------------------------------
+					jne estend
+				mov al, fnamen
+				add al, 3	; +3 onde começa
+				cmp posy, al   ; se o 'x' estiver no back
+					jne qualmaze
+				ret
+				qualmaze:
+					mov zeros, 0
+					mov al, posy
+					sub al, 3
+					xor si, si
+					xor di, di
+				part1:
+					cmp zeros, al
+						je avanca
+					mov ah, fname[si]
+					mov fname[di], ah
+					inc si
+					inc di
+					cmp fname[si], 0
+						jne part1
+					inc zeros
+					jmp part1
+				
+				avanca:
+					cmp fname[si], 0
+					inc si	
+						jne avanca
+				part2:
+					mov ah, fname[si]
+					mov fname[di], ah
+					inc si
+					inc di
+					cmp si, fnameptr
+						jne part2
+					mov fnameptr, di
+					dec fnamen
+					jmp inicio
+
+			ESTEND:
+				cmp 	al,48h
+				jne		BAIXO
+				dec		POSy		;cima
+				jmp		CICLO
+
+			BAIXO:
+				cmp		al,50h
+				jne		ciclo
+				inc 	POSy		;Baixo
+				jmp		CICLO
+
+
+menuDeleteMaze endp   ;##########################----apagar labirintos---####################################
+
+
 
 MENUCONFIG PROC  ;##########################----MENU DE CONFIGURACAO---####################################
 inicio:
@@ -717,9 +906,31 @@ loadDefaultMaze:
 	cmp posy, 6 ;se o x estiver no load default maze
 		jne deletemaze
 	mov fnameop, 0
-	jmp inicio
+	call apaga_ecran
+	mov posy, 2
+	mov posx, 4
+	goto_xy	POSx,POSy
+	xor si, si
+	puts:
+		cmp string3[si], 0
+			je getchar
+		mov ah, 02h
+		mov dl, string3[si]
+		int 21h
+		inc si
+		jmp puts
+	getchar:
+		call 	le_tecla
+		cmp 	al, 13	 ; enter
+			je		inicio
+	jmp getchar
 deletemaze:
+	cmp posy, 10 ;se o x estiver no delete maze
+		jne editmaze
+	call menudeletemaze
+	jmp inicio
 	
+editmaze:	
 	jmp		LER_SETA
 
 ESTEND:
@@ -750,6 +961,15 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeY, 1
   goto_xy	MazeX,MazeY
 	
+	
+	mov cx, 13
+	xor si, si
+	inicializa:  ;colocar fnameopen toda a zeros
+		mov fnameopen[si], 0
+		inc si
+		loop inicializa
+	
+	
 	mov p, 0
 	xor si, si
 	cmp fnameop, 0
@@ -764,22 +984,30 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
 	notdefault:
 		mov al, fnameop
 		dec al ;pq 0 é o mazedefault
-		cmp p, al
-			je strcpy2
-		cmp fname[si], 0
-		inc si
-			jne notdefault
-		inc p
-		jmp notdefault
+		cmp p, al ;pe é o n de zeros
+			je prepstrcpy2
+		srchzero:
+			cmp fname[si], 0
+				je incp
+			inc si
+			jmp srchzero
+		incp:
+			inc p
+			inc si
+			jmp notdefault
+	prepstrcpy2:
+		xor di, di
 	strcpy2:
 		cmp fname[si], 0
 			je openmaze
 		mov al, fname[si]
-		mov fnameopen[si], al
+		mov fnameopen[di], al
 		inc si
+		inc di
 		jmp strcpy2
   
   openmaze:
+  
   mov     ah,3dh			; vamos abrir ficheiro para leitura
   mov     al,0			; tipo de ficheiro
   lea     dx, fnameopen			; nome do ficheiro
@@ -927,6 +1155,10 @@ inicio:
 	mov		ax,0B800h           ; Apaga
 	mov		es,ax				;	o
 	call		apaga_ecran		; Ecran
+	
+	mov POSy,			18	
+	mov POSx,			33
+	goto_xy posx, posy
 
 	;abre ficheiro
 	mov     ah,3dh			    ; vamos abrir ficheiro para leitura
@@ -1032,10 +1264,13 @@ LER_SETA:
 
 	cmp al, 13					;enter
 		jne estend
-  cmp posy, 18 ; se o 'x' estiver no play
-    je play
-	cmp posy, 21  ; se o 'x' estiver no exit
-		je fim
+	cmp posy, 18 ; se o 'x' estiver no play
+		jne exit
+	call play
+	jmp inicio
+	exit:
+		cmp posy, 21  ; se o 'x' estiver no exit
+			je fim
 	cmp posy, 20 ; se o 'x' estiver no maze config
 		jne estend
 	call menuconfig
