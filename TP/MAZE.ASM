@@ -25,6 +25,7 @@ dseg    segment para public 'data'
   p db 0 ; ponteiro
   pant db 0
   zeros db 0
+  lastzero dw 0
   fnameopen db 13 dup(?)
   Cor		           db	   7	; Guarda os atributos de cor do caracter
   POSya		         db	   5	; Posi��o anterior de y
@@ -778,15 +779,25 @@ menuLoadUmaze proc   ;##########################----carregar labirinto---#######
 	mov posx, 3
 	goto_xy	POSx,POSy
 	xor si, si ;si=0
-
+	mov ax, fnameptr
+	mov lastzero, ax
+	dec lastzero
 	titulo:
 		cmp string2[si], 0
-			je mazesinic
+			je checkelements
 		mov ah, 02h
 		mov dl, string2[si]
 		int 21h
 		inc si
 		jmp titulo
+		
+	checkelements:
+		cmp fnamen, 0
+			jne mazesinic
+		mov posy, 2
+		mov posx, 20
+		goto_xy	POSx,POSy
+		jmp lerop
 
 	mazesinic:
 		mov posy, 3
@@ -806,7 +817,7 @@ menuLoadUmaze proc   ;##########################----carregar labirinto---#######
 
 		cmp fname[si], 0
 			jne notnline
-		cmp fnameptr, si
+		cmp lastzero, si
 			je lerOp
 		inc posy
 		goto_xy	POSx,POSy
@@ -829,7 +840,17 @@ menuLoadUmaze proc   ;##########################----carregar labirinto---#######
 			jmp mazes
 
 	lerOp:
-
+		inc posy
+		goto_xy	POSx,POSy
+		mov ah, 02h
+		mov dl, 91 ;[
+		int 21h
+		mov ah, 02h
+		mov dl, 32 ; espaco
+		int 21h
+		mov ah, 02h
+		mov dl, 93 ;]
+		int 21h
 		mov ah, 02h
 		mov dl, 66 ; b
 		int 21h
@@ -935,15 +956,26 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 	mov posx, 8
 	goto_xy	POSx,POSy
 	xor si, si ;si=0
+	mov ax, fnameptr
+	mov lastzero, ax
+	dec lastzero
 
 	titulo:
 		cmp string4[si], 0
-			je mazesinic
+			je checkelements
 		mov ah, 02h
 		mov dl, string4[si]
 		int 21h
 		inc si
 		jmp titulo
+	
+	checkelements:
+	cmp fnamen, 0
+		jne mazesinic
+	mov posy, 2
+	mov posx, 20
+	goto_xy	POSx,POSy
+	jmp lerop
 
 	mazesinic:
 		mov posy, 3
@@ -963,7 +995,7 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 
 		cmp fname[si], 0
 			jne notnline
-		cmp fnameptr, si
+		cmp lastzero, si
 			je lerOp
 		inc posy
 		goto_xy	POSx,POSy
@@ -986,7 +1018,17 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 			jmp mazes
 
 	lerOp:
-
+		inc posy
+		goto_xy	POSx,POSy
+		mov ah, 02h
+		mov dl, 91 ;[
+		int 21h
+		mov ah, 02h
+		mov dl, 32 ; espaco
+		int 21h
+		mov ah, 02h
+		mov dl, 93 ;]
+		int 21h
 		mov ah, 02h
 		mov dl, 66 ; b
 		int 21h
@@ -1002,6 +1044,7 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 		mov posy, 3
 		mov posx, 21  ;meter o x dentro do []
 		goto_xy	POSx,POSy
+		
 
 		CICLO:
 			mov al, fnamen
@@ -1061,38 +1104,48 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 				cmp posy, al   ; se o 'x' estiver no back
 					jne qualmaze
 				ret
+				
 				qualmaze:
+					
 					mov zeros, 0
 					mov al, posy
 					sub al, 3
 					xor si, si
 					xor di, di
-				part1:
-					cmp zeros, al
-						je avanca
-					mov ah, fname[si]
-					mov fname[di], ah
-					inc si
-					inc di
-					cmp fname[si], 0
-						jne part1
-					inc zeros
-					jmp part1
-
-				avanca:
-					cmp fname[si], 0
-					inc si
-						jne avanca
-				part2:
-					mov ah, fname[si]
-					mov fname[di], ah
-					inc si
-					inc di
-					cmp si, fnameptr
-						jne part2
-					mov fnameptr, di
-					dec fnamen
-					jmp inicio
+				
+					incsidi:
+						cmp zeros, al
+						inc si
+						inc di
+							je incsi
+						cmp fname[si], 0
+							jne notzero
+						inc zeros
+						notzero:
+						jmp incsidi
+				
+					incsi:
+						cmp al, 0  ;caso especial, se for o primeiro elemento do vetor
+							jne notfst
+						dec di
+						dec si
+						notfst:
+							inc si
+							cmp fname[si], 0
+								jne notfst
+					strcpy:
+						mov ah, fname[si]
+						mov fname[di], ah
+						inc si
+						inc di
+						cmp si, fnameptr
+							jne strcpy
+						mov fnameptr, di
+						dec fnamen
+						jmp inicio
+				
+				
+				jmp inicio
 
 			ESTEND:
 				cmp 	al,48h
