@@ -944,7 +944,7 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 		int 21h
 		inc si
 		jmp titulo
-		
+
 	mazesinic:
 		mov posy, 3
 		mov posx, 20
@@ -960,7 +960,7 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 		int 21h
 		xor si, si ;si=0
 	mazes:
-		
+
 		cmp fname[si], 0
 			jne notnline
 		cmp fnameptr, si
@@ -984,9 +984,9 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 			int 21h
 			inc si
 			jmp mazes
-	
+
 	lerOp:
-	
+
 		mov ah, 02h
 		mov dl, 66 ; b
 		int 21h
@@ -1002,11 +1002,11 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 		mov posy, 3
 		mov posx, 21  ;meter o x dentro do []
 		goto_xy	POSx,POSy
-		
+
 		CICLO:
 			mov al, fnamen
-			add al, 4  ;  
-			cmp posy, al 
+			add al, 4  ;
+			cmp posy, al
 				jne snake
 			mov posy, 3 ;posicao inicial
 
@@ -1018,9 +1018,9 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 
 			fimsnake:
 			;**************************************
-				
+
 				goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
-				
+
 				mov		ah, 02h
 				mov		dl, Car	; Repoe Caracter guardado
 				int		21H
@@ -1078,10 +1078,10 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 						jne part1
 					inc zeros
 					jmp part1
-				
+
 				avanca:
 					cmp fname[si], 0
-					inc si	
+					inc si
 						jne avanca
 				part2:
 					mov ah, fname[si]
@@ -1262,23 +1262,14 @@ loadDefaultMaze:
 			je		inicio
 	jmp getchar
 deletemaze:
-<<<<<<< HEAD
 
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 	cmp posy, 10 ;se o x estiver no delete maze
 		jne editmaze
 	call menudeletemaze
 	jmp inicio
-	
-editmaze:	
-<<<<<<< Updated upstream
 
-=======
->>>>>>> master
->>>>>>> Stashed changes
+editmaze:
+
 	jmp		LER_SETA
 
 ESTEND:
@@ -1308,14 +1299,7 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeX, 1
   mov MazeY, 1
   goto_xy	MazeX,MazeY
-<<<<<<< HEAD
 
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-	
-	
 	mov cx, 13
 	xor si, si
 	inicializa:  ;colocar fnameopen toda a zeros
@@ -1323,11 +1307,6 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
 		inc si
 		loop inicializa
 	
-<<<<<<< Updated upstream
-=======
-	
->>>>>>> master
->>>>>>> Stashed changes
 	mov p, 0
 	xor si, si
 	cmp fnameop, 0
@@ -1365,7 +1344,7 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
 		jmp strcpy2
 
   openmaze:
-  
+
   mov     ah,3dh			; vamos abrir ficheiro para leitura
   mov     al,0			; tipo de ficheiro
   lea     dx, fnameopen			; nome do ficheiro
@@ -1513,8 +1492,8 @@ inicio:
 	mov		ax,0B800h           ; Apaga
 	mov		es,ax				;	o
 	call		apaga_ecran		; Ecran
-	
-	mov POSy,			18	
+
+	mov POSy,			18
 	mov POSx,			33
 	goto_xy posx, posy
 
