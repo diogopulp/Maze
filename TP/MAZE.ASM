@@ -84,6 +84,9 @@ dseg    segment para public 'data'
   NUMDIG	db	0	; controla o numero de digitos do numero lido
   MAXDIG	db	4	; Constante que define o numero MAXIMO de digitos a ser aceite
 
+  contador db 47; contador de segundos
+  strcontador db "     $" ;string para ser impressa
+
 dseg    ends
 
 cseg    segment para public 'code'
@@ -127,135 +130,36 @@ apaga_ecran	endp
 ; CH - Horas, CL - Minutos, DH - Segundos
 ;********************************************************************************
 
-Ler_TEMPO PROC
+LER_TEMPO PROC
 
-		PUSH AX
-		PUSH BX
-		PUSH CX
-		PUSH DX
+  push ax
+  push bx
+  push cx
+  push dx
+  pushf
 
-		PUSHF
+	MOV AH, 2CH             ; Buscar a hORAS
+	INT 21H
 
-		MOV AH, 2CH             ; Buscar a hORAS
-		INT 21H
+	XOR AX,AX
+	MOV AL, DH              ; segundos para al
+	mov Segundos, AX		; guarda segundos na variavel correspondente
 
-		XOR AX,AX
-		MOV AL, DH              ; segundos para al
-		mov Segundos, AX		; guarda segundos na variavel correspondente
+	XOR AX,AX
+	MOV AL, CL              ; Minutos para al
+	mov Minutos, AX         ; guarda MINUTOS na variavel correspondente
 
-		XOR AX,AX
-		MOV AL, CL              ; Minutos para al
-		mov Minutos, AX         ; guarda MINUTOS na variavel correspondente
+	XOR AX,AX
+	MOV AL, CH              ; Horas para al
+	mov Horas,AX			; guarda HORAS na variavel correspondente
 
-		XOR AX,AX
-		MOV AL, CH              ; Horas para al
-		mov Horas,AX			; guarda HORAS na variavel correspondente
-
-		POPF
-		POP DX
-		POP CX
-		POP BX
-		POP AX
- 		RET
-Ler_TEMPO   ENDP
-
-;********************************************************************************
-;********************************************************************************
-;-------------------------------------------------------------------
-; HOJE - LE DATA DO SISTEMA E COLOCA NUMA STRING NA FORMA DD/MM/AAAA
-; CX - ANO, DH - MES, DL - DIA
-;-------------------------------------------------------------------
-HOJE PROC	; Isto em principio vai ser para remover, agora é só para testar se funciona ou n
-
-		PUSH AX
-		PUSH BX
-		PUSH CX
-		PUSH DX
-		PUSH SI
-		PUSHF
-
-		MOV AH, 2AH             ; Buscar a data
-		INT 21H
-		PUSH CX                 ; Ano-> PILHA
-		XOR CX,CX              	; limpa CX
-		MOV CL, DH              ; Mes para CL
-		PUSH CX                 ; Mes-> PILHA
-		MOV CL, DL				; Dia para CL
-		PUSH CX                 ; Dia -> PILHA
-		XOR DH,DH
-		XOR	SI,SI
-; DIA ------------------
-; DX=DX/AX --- RESTO DX
-		XOR DX,DX               ; Limpa DX
-		POP AX                  ; Tira dia da pilha
-		MOV CX, 0               ; CX = 0
-		MOV BX, 10              ; Divisor
-		MOV	CX,2
-DD_DIV:
-		DIV BX                  ; Divide por 10
-		PUSH DX                 ; Resto para pilha
-		MOV DX, 0               ; Limpa resto
-		loop dd_div
-		MOV	CX,2
-DD_RESTO:
-		POP DX                  ; Resto da divisao
-		ADD DL, 30h             ; ADD 30h (2) to DL
-		MOV DDMMAAAA[SI],DL
-		INC	SI
-		LOOP DD_RESTO
-		MOV DL, '/'             ; Separador
-		MOV DDMMAAAA[SI],DL
-		INC SI
-; MES -------------------
-; DX=DX/AX --- RESTO DX
-		MOV DX, 0               ; Limpar DX
-		POP AX                  ; Tira mes da pilha
-		XOR CX,CX
-		MOV BX, 10				; Divisor
-		MOV CX,2
-MM_DIV:
-		DIV BX                  ; Divisao or 10
-		PUSH DX                 ; Resto para pilha
-		MOV DX, 0               ; Limpa resto
-		LOOP MM_DIV
-		MOV CX,2
-MM_RESTO:
-		POP DX                  ; Resto
-		ADD DL, 30h             ; SOMA 30h
-		MOV DDMMAAAA[SI],DL
-		INC SI
-		LOOP MM_RESTO
-
-		MOV DL, '/'             ; Character to display goes in DL
-		MOV DDMMAAAA[SI],DL
-		INC SI
-
-;  ANO ----------------------
-		MOV DX, 0
-		POP AX                  ; mes para AX
-		MOV CX, 0               ;
-		MOV BX, 10              ;
- AA_DIV:
-		DIV BX
-		PUSH DX                 ; Guarda resto
-		ADD CX, 1               ; Soma 1 contador
-		MOV DX, 0               ; Limpa resto
-		CMP AX, 0               ; Compara quotient com zero
-		JNE AA_DIV              ; Se nao zero
-AA_RESTO:
-		POP DX
-		ADD DL, 30h             ; ADD 30h (2) to DL
-		MOV DDMMAAAA[SI],DL
-		INC SI
-		LOOP AA_RESTO
-		POPF
-		POP SI
-		POP DX
-		POP CX
-		POP BX
-		POP AX
- 		RET
-HOJE   ENDP
+	POPF
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	RET
+LER_TEMPO   ENDP
 
 ;********************************************************************************
 ;********************************************************************************
@@ -263,90 +167,35 @@ HOJE   ENDP
 
 Trata_Horas PROC
 
-		PUSHF
-		PUSH AX
-		PUSH BX
-		PUSH CX
-		PUSH DX
+    pushf
+    push ax
+    push bx
+    push cx
+    push dx
 
-		CALL 	Ler_TEMPO				; Horas MINUTOS e segundos do Sistema
+		call 	Ler_TEMPO				; Horas MINUTOS e segundos do Sistema
 
-		MOV		AX, Segundos
-		cmp		AX, Old_seg			; VErifica se os segundos mudaram desde a ultima leitura
-		je		fim_horas			; Se a hora não mudou desde a última leitura sai.
-		mov		Old_seg, AX			; Se segundos são diferentes actualiza informação do tempo
+		mov	ax, segundos
+		cmp	ax, Old_seg			; VErifica se os segundos mudaram desde a ultima leitura
+		je	fim_horas			; Se a hora não mudou desde a última leitura sai.
+		mov	Old_seg, ax			; Se segundos são diferentes actualiza informação do tempo
 
-		mov 	ax,Horas
-		MOV		bl, 10
-		div 	bl
-		add 	al, 30h				; Caracter Correspondente às dezenas
-		add		ah,	30h				; Caracter Correspondente às unidades
-		MOV 	STR12[0],al			;
-		MOV 	STR12[1],ah
-		MOV 	STR12[2],'h'
-		MOV 	STR12[3],'$'
-		GOTO_XY 2,1
-		MOSTRA STR12
+    inc contador
+		mov bl, contador
+		mov	strcontador, bl ; isto está bem
 
-		mov 	ax,Minutos
-		MOV 	bl, 10
-		div 	bl
-		add 	al, 30h				; Caracter Correspondente às dezenas
-		add		ah,	30h				; Caracter Correspondente às unidades
-		MOV 	STR12[0],al			;
-		MOV 	STR12[1],ah
-		MOV 	STR12[2],'m'
-		MOV 	STR12[3],'$'
-		GOTO_XY	6,1
-		MOSTRA	STR12
-
-		mov 	ax,Segundos
-		MOV 	bl, 10
-		div 	bl
-		add 	al, 30h				; Caracter Correspondente às dezenas
-		add		ah,	30h				; Caracter Correspondente às unidades
-		MOV 	STR12[0],al			;
-		MOV 	STR12[1],ah
-		MOV 	STR12[2],'s'
-		MOV 	STR12[3],'$'
-		GOTO_XY	10,1
-		MOSTRA	STR12
-
-		CALL 	HOJE				; Data de HOJE
-		MOV 	al ,DDMMAAAA[0]
-		MOV 	STR12[0], al
-		MOV 	al ,DDMMAAAA[1]
-		MOV 	STR12[1], al
-		MOV 	al ,DDMMAAAA[2]
-		MOV 	STR12[2], al
-		MOV 	al ,DDMMAAAA[3]
-		MOV 	STR12[3], al
-		MOV 	al ,DDMMAAAA[4]
-		MOV 	STR12[4], al
-		MOV 	al ,DDMMAAAA[5]
-		MOV 	STR12[5], al
-		MOV 	al ,DDMMAAAA[6]
-		MOV 	STR12[6], al
-		MOV 	al ,DDMMAAAA[7]
-		MOV 	STR12[7], al
-		MOV 	al ,DDMMAAAA[8]
-		MOV 	STR12[8], al
-		MOV 	al ,DDMMAAAA[9]
-		MOV 	STR12[9], al
-		MOV 	STR12[10],'$'
-		GOTO_XY	68,1
-		MOSTRA	STR12
-
+    goto_xy 68,1 ; cato superior direito
+		mostra strcontador
 
 fim_horas:
 		goto_xy	POSx,POSy			; Volta a colocar o cursor onde estava antes de actualizar as horas
 
-		POPF
-		POP DX
-		POP CX
-		POP BX
-		POP AX
-		RET
+    popf
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+		ret
 
 Trata_Horas ENDP
 
@@ -370,7 +219,7 @@ LIMPA_N:
 		mov		al, 10
 		mov		POSy,al				; (POSx,POSy) é posição do cursor
 		goto_xy	POSx,POSy
-		MOSTRA	NUM_SP
+		;MOSTRA	NUM_SP
 
 CICLO:	goto_xy	POSx,POSy
 
@@ -421,13 +270,13 @@ NOBACK:
 ESTEND:	jmp	CICLO			; Tecla extendida não é tratada neste programa
 
 OKNUM:	goto_xy	20,16
-		MOSTRA	NUM_SP
+		;MOSTRA	NUM_SP
 		goto_xy	20,16
 		xor		bx,bx
 		mov		bl, NUMDIG
 		inc 	bl
 		MOV		NUMERO[bx], '$'
-		MOSTRA	NUMERO
+		;MOSTRA	NUMERO
 		jmp		NOVON		; Vai ler novo numero
 
 fim:	ret
@@ -480,14 +329,32 @@ GUARDA_ECRA ENDP  ; ------>GUARDA ECRA NO BUFFER<------
 
 LE_TECLA	PROC   ; ------>LE UMA TECLA<------
 
-	mov		ah,08h
-	int		21h
-	mov		ah,0
-	cmp		al,0
-	jne		SAI_TECLA
-	mov		ah, 08h
-	int		21h
-	mov		ah,1
+	;mov		ah,08h
+	;int		21h
+	;mov		ah,0
+	;cmp		al,0
+	;jne		SAI_TECLA
+	;mov		ah, 08h
+	;int		21h
+	;mov		ah,1
+
+  sem_tecla:
+  		call Trata_Horas
+  		MOV	AH,0BH
+  		INT 21h
+  		cmp AL,0
+  		je	sem_tecla
+
+  		goto_xy	POSx,POSy
+
+  		MOV	AH,08H
+  		INT	21H
+  		MOV	AH,0
+  		CMP	AL,0
+  		JNE	SAI_TECLA
+  		MOV	AH, 08H
+  		INT	21H
+  		MOV	AH,1
 
 sai_tecla:
   ret
@@ -790,7 +657,7 @@ menuLoadUmaze proc   ;##########################----carregar labirinto---#######
 		int 21h
 		inc si
 		jmp titulo
-		
+
 	checkelements:
 		cmp fnamen, 0
 			jne mazesinic
@@ -968,7 +835,7 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 		int 21h
 		inc si
 		jmp titulo
-	
+
 	checkelements:
 	cmp fnamen, 0
 		jne mazesinic
@@ -1044,7 +911,7 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 		mov posy, 3
 		mov posx, 21  ;meter o x dentro do []
 		goto_xy	POSx,POSy
-		
+
 
 		CICLO:
 			mov al, fnamen
@@ -1104,15 +971,15 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 				cmp posy, al   ; se o 'x' estiver no back
 					jne qualmaze
 				ret
-				
+
 				qualmaze:
-					
+
 					mov zeros, 0
 					mov al, posy
 					sub al, 3
 					xor si, si
 					xor di, di
-				
+
 					incsidi:
 						cmp zeros, al
 						inc si
@@ -1123,7 +990,7 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 						inc zeros
 						notzero:
 						jmp incsidi
-				
+
 					incsi:
 						cmp al, 0  ;caso especial, se for o primeiro elemento do vetor
 							jne notfst
@@ -1143,8 +1010,8 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 						mov fnameptr, di
 						dec fnamen
 						jmp inicio
-				
-				
+
+
 				jmp inicio
 
 			ESTEND:
@@ -1343,6 +1210,7 @@ fim:
 
 MENUCONFIG ENDP ;##########################----MENU DE CONFIGURACAO---####################################
 
+
 PLAY PROC ;##########################----INICIA O JOGO---####################################
 
   mov		ax,0B800h           ; Apaga
@@ -1353,13 +1221,14 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeY, 1
   goto_xy	MazeX,MazeY
 
+
 	mov cx, 13
 	xor si, si
 	inicializa:  ;colocar fnameopen toda a zeros
 		mov fnameopen[si], 0
 		inc si
 		loop inicializa
-	
+
 	mov p, 0
 	xor si, si
 	cmp fnameop, 0
@@ -1449,7 +1318,9 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
 
-CICLO:	goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+CICLO:
+
+  goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
   mov		ah, 02h
   mov		dl, Car	; Repoe Caracter guardado
   int		21H
@@ -1468,7 +1339,10 @@ CICLO:	goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
 
   goto_xy	MazeX,MazeY	; Vai para posi��o do cursor
 
-IMPRIME:	mov		ah, 02h
+IMPRIME:
+
+
+  mov		ah, 02h
   mov		dl, 233	; Coloca AVATAR
   int		21H
   goto_xy	MazeX,MazeY	; Vai para posi��o do cursor
@@ -1520,19 +1394,23 @@ DIREITA:
 
 PAREDECIMA:
   inc MazeY
-  call menu
+  ;call menu
+  ret
 
 PAREDEBAIXO:
   dec MazeY
-  call menu
+  ;call menu
+  ret
 
 PAREDEESQUERDA:
   inc MazeX
-  call menu
+  ;call menu
+  ret
 
 PAREDEDIREITA:
   dec MazeX
-  call menu
+  ;call menu
+  ret
 
 fim:
 	mov		ah,4CH
@@ -1541,149 +1419,149 @@ fim:
 PLAY ENDP ;##########################----INICIA O JOGO---#####################################
 
 MENU PROC ;##########################----MENU PRINCIPAL---####################################
-inicio:
-	mov		ax,0B800h           ; Apaga
-	mov		es,ax				;	o
-	call		apaga_ecran		; Ecran
+  inicio:
+  	mov		ax,0B800h           ; Apaga
+  	mov		es,ax				;	o
+  	call		apaga_ecran		; Ecran
 
-	mov POSy,			18
-	mov POSx,			33
-	goto_xy posx, posy
+  	mov POSy,			18
+  	mov POSx,			33
+  	goto_xy posx, posy
 
-	;abre ficheiro
-	mov     ah,3dh			    ; vamos abrir ficheiro para leitura
-	mov     al,0			      ; tipo de ficheiro
-	lea     dx,FichMenu			    ; nome do ficheiro
-	int     21h			        ; abre para leitura
-	jc      erro_abrir		  ; pode aconter erro a abrir o ficheiro
-	mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
-	jmp     ler_ciclo		    ; depois de aberto vamos ler o ficheiro
+  	;abre ficheiro
+  	mov     ah,3dh			    ; vamos abrir ficheiro para leitura
+  	mov     al,0			      ; tipo de ficheiro
+  	lea     dx,FichMenu			    ; nome do ficheiro
+  	int     21h			        ; abre para leitura
+  	jc      erro_abrir		  ; pode aconter erro a abrir o ficheiro
+  	mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+  	jmp     ler_ciclo		    ; depois de aberto vamos ler o ficheiro
 
-erro_abrir:
-	mov     ah,09h
-	lea     dx,Erro_Open
-	int     21h
-;    jmp     sai
+  erro_abrir:
+  	mov     ah,09h
+  	lea     dx,Erro_Open
+  	int     21h
+  ;    jmp     sai
 
-ler_ciclo:
-	mov     ah,3fh			    ; indica que vai ser lido um ficheiro
-	mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
-	mov     cx,1			      ; numero de bytes a ler
-	lea     dx,car_fich		  ; vai ler para o local de memoria apontado por dx (car_fich)
-	int     21h				      ; faz efectivamente a leitura
-	  jc	    erro_ler		    ; se carry é porque aconteceu um erro
-	  cmp	    ax,0			      ; EOF?	verifica se já estamos no fim do ficheiro
-	  je	    fecha_ficheiro	; se EOF fecha o ficheiro
-	mov     ah,02h			    ; coloca o caracter no ecran
-	  mov	    dl,car_fich		  ; este é o caracter a enviar para o ecran
-	  int	    21h				      ; imprime no ecran
-	  jmp	    ler_ciclo		    ; continua a ler o ficheiro
+  ler_ciclo:
+  	mov     ah,3fh			    ; indica que vai ser lido um ficheiro
+  	mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+  	mov     cx,1			      ; numero de bytes a ler
+  	lea     dx,car_fich		  ; vai ler para o local de memoria apontado por dx (car_fich)
+  	int     21h				      ; faz efectivamente a leitura
+  	  jc	    erro_ler		    ; se carry é porque aconteceu um erro
+  	  cmp	    ax,0			      ; EOF?	verifica se já estamos no fim do ficheiro
+  	  je	    fecha_ficheiro	; se EOF fecha o ficheiro
+  	mov     ah,02h			    ; coloca o caracter no ecran
+  	  mov	    dl,car_fich		  ; este é o caracter a enviar para o ecran
+  	  int	    21h				      ; imprime no ecran
+  	  jmp	    ler_ciclo		    ; continua a ler o ficheiro
 
-erro_ler:
-	mov     ah,09h
-	lea     dx,Erro_Ler_Msg
-	int     21h
+  erro_ler:
+  	mov     ah,09h
+  	lea     dx,Erro_Ler_Msg
+  	int     21h
 
-fecha_ficheiro:					        ; vamos fechar o ficheiro
-	mov     ah,3eh
-	mov     bx,HandleFich
-	int     21h
-	mov		ax, dseg
-	mov		ds,ax
-	mov		ax,0B800h
-	mov		es,ax
+  fecha_ficheiro:					        ; vamos fechar o ficheiro
+  	mov     ah,3eh
+  	mov     bx,HandleFich
+  	int     21h
+  	mov		ax, dseg
+  	mov		ds,ax
+  	mov		ax,0B800h
+  	mov		es,ax
 
-goto_xy	POSx,POSy	  ; Vai para nova possi��o
-	mov 	ah, 08h	    ; Guarda o Caracter que est� na posi��o do Cursor
-	mov		bh,0		    ; numero da p�gina
-	int		10h
-	mov		Car, al	    ; Guarda o Caracter que est� na posi��o do Cursor
-	mov		Cor, ah	    ; Guarda a cor que est� na posi��o do Cursor
+  goto_xy	POSx,POSy	  ; Vai para nova possi��o
+  	mov 	ah, 08h	    ; Guarda o Caracter que est� na posi��o do Cursor
+  	mov		bh,0		    ; numero da p�gina
+  	int		10h
+  	mov		Car, al	    ; Guarda o Caracter que est� na posi��o do Cursor
+  	mov		Cor, ah	    ; Guarda a cor que est� na posi��o do Cursor
 
-CICLO:
-;**************************************
-	cmp posy, 22
-		jne snake
-	mov posy, 18
-	snake:					;manter o 'x' dentro dos limites
+  CICLO:
+  ;**************************************
+  	cmp posy, 22
+  		jne snake
+  	mov posy, 18
+  	snake:					;manter o 'x' dentro dos limites
 
-	cmp posy, 17
-		jne fimsnake
-	mov posy, 21
-	fimsnake:
-;*************************************
+  	cmp posy, 17
+  		jne fimsnake
+  	mov posy, 21
+  	fimsnake:
+  ;*************************************
 
-	goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
-		mov		ah, 02h
-		mov		dl, Car	; Repoe Caracter guardado
-		int		21H
+  	goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+  		mov		ah, 02h
+  		mov		dl, Car	; Repoe Caracter guardado
+  		int		21H
 
-	goto_xy	POSx,POSy	; Vai para nova possi��o
-		mov 		ah, 08h
-		mov		bh,0		; numero da p�gina
-		int		10h
-		mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
-		mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+  	goto_xy	POSx,POSy	; Vai para nova possi��o
+  		mov 		ah, 08h
+  		mov		bh,0		; numero da p�gina
+  		int		10h
+  		mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
+  		mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
-	goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
-		mov		ah, 02h	; IMPRIME caracter da posi��o no canto
-		mov		dl, Car
-		int		21H
+  	goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
+  		mov		ah, 02h	; IMPRIME caracter da posi��o no canto
+  		mov		dl, Car
+  		int		21H
 
-		goto_xy	POSx,POSy	; Vai para posi��o do cursor
+  		goto_xy	POSx,POSy	; Vai para posi��o do cursor
 
-IMPRIME:
-	mov		ah, 02h
-		mov		dl, 120	; Coloca AVATAR x -> 120
-		int		21H
-		goto_xy	POSx,POSy	; Vai para posi��o do cursor
+  IMPRIME:
+  	mov		ah, 02h
+  		mov		dl, 120	; Coloca AVATAR x -> 120
+  		int		21H
+  		goto_xy	POSx,POSy	; Vai para posi��o do cursor
 
-		mov		al, POSx	; Guarda a posi��o do cursor
-		mov		POSxa, al
-		mov		al, POSy	; Guarda a posi��o do cursor
-		mov 		POSya, al
+  		mov		al, POSx	; Guarda a posi��o do cursor
+  		mov		POSxa, al
+  		mov		al, POSy	; Guarda a posi��o do cursor
+  		mov 		POSya, al
 
-LER_SETA:
-	call 	le_tecla
-	cmp		ah, 1
-	je		ESTEND
-	cmp 	al, 27	; ESCAPE
-	je		FIM
-;*************************************
-; 						ler opcao
+  LER_SETA:
+  	call 	le_tecla
+  	cmp		ah, 1
+  	je		ESTEND
+  	cmp 	al, 27	; ESCAPE
+  	je		FIM
+  ;*************************************
+  ; 						ler opcao
 
-	cmp al, 13					;enter
-		jne estend
-	cmp posy, 18 ; se o 'x' estiver no play
-		jne exit
-	call play
-	jmp inicio
-	exit:
-		cmp posy, 21  ; se o 'x' estiver no exit
-			je fim
-	cmp posy, 20 ; se o 'x' estiver no maze config
-		jne estend
-	call menuconfig
-	jmp inicio
+  	cmp al, 13					;enter
+  		jne estend
+  	cmp posy, 18 ; se o 'x' estiver no play
+  		jne exit
+  	call play
+  	jmp inicio
+  	exit:
+  		cmp posy, 21  ; se o 'x' estiver no exit
+  			je fim
+  	cmp posy, 20 ; se o 'x' estiver no maze config
+  		jne estend
+  	call menuconfig
+  	jmp inicio
 
-;*************************************
-	jmp		LER_SETA
+  ;*************************************
+  	jmp		LER_SETA
 
-ESTEND:
-	cmp 		al,48h
-		jne		BAIXO
-	dec		POSy		;cima
-	jmp		CICLO
+  ESTEND:
+  	cmp 		al,48h
+  		jne		BAIXO
+  	dec		POSy		;cima
+  	jmp		CICLO
 
-BAIXO:
-	cmp		al,50h
-	jne		ciclo
-	inc 		POSy		;Baixo
-	jmp		CICLO
+  BAIXO:
+  	cmp		al,50h
+  	jne		ciclo
+  	inc 		POSy		;Baixo
+  	jmp		CICLO
 
-fim:
-		mov		ah,4CH
-		int		21H
+  fim:
+  		mov		ah,4CH
+  		int		21H
 
 
 MENU ENDP ;##########################----MENU PRINCIPAL---####################################
@@ -1693,8 +1571,7 @@ MAIN PROC ;###############################----MAIN---###########################
   mov     ds,ax
 
   call MENU
-  ;call apaga_ecran
-  ;call teclanum
+  ;;call teclanum
 
 MAIN  ENDP ;###############################----MAIN---########################################
 CSEG ENDS
