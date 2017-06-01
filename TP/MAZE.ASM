@@ -1262,14 +1262,23 @@ loadDefaultMaze:
 			je		inicio
 	jmp getchar
 deletemaze:
+<<<<<<< HEAD
 
+<<<<<<< Updated upstream
+=======
+=======
+>>>>>>> Stashed changes
 	cmp posy, 10 ;se o x estiver no delete maze
 		jne editmaze
 	call menudeletemaze
 	jmp inicio
 	
 editmaze:	
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> master
+>>>>>>> Stashed changes
 	jmp		LER_SETA
 
 ESTEND:
@@ -1299,7 +1308,12 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeX, 1
   mov MazeY, 1
   goto_xy	MazeX,MazeY
+<<<<<<< HEAD
 
+<<<<<<< Updated upstream
+=======
+=======
+>>>>>>> Stashed changes
 	
 	
 	mov cx, 13
@@ -1309,6 +1323,11 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
 		inc si
 		loop inicializa
 	
+<<<<<<< Updated upstream
+=======
+	
+>>>>>>> master
+>>>>>>> Stashed changes
 	mov p, 0
 	xor si, si
 	cmp fnameop, 0
