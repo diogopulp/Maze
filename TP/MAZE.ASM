@@ -998,9 +998,9 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 
 					incsidi:
 						cmp zeros, al
+							je incsi
 						inc si
 						inc di
-							je incsi
 						cmp fname[si], 0
 							jne notzero
 						inc zeros
@@ -1009,13 +1009,19 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 
 					incsi:
 						cmp al, 0  ;caso especial, se for o primeiro elemento do vetor
-							jne notfst
-						dec di
-						dec si
-						notfst:
+							je first
+						inc di
+						mov ah, fnamen
+						dec ah
+						cmp al, ah  ;caso especial, se for o ultimo elemento do vetor
+							je last
+						first:
+							cmp fnamen, 1  ;caso especial, se for o unico elemento do vetor
+								je last
 							inc si
 							cmp fname[si], 0
-								jne notfst
+								jne first
+						inc si
 					strcpy:
 						mov ah, fname[si]
 						mov fname[di], ah
@@ -1023,12 +1029,11 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 						inc di
 						cmp si, fnameptr
 							jne strcpy
+					last:
 						mov fnameptr, di
 						dec fnamen
 						jmp inicio
 
-
-				jmp inicio
 
 			ESTEND:
 				cmp 	al,48h
