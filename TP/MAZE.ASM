@@ -17,7 +17,9 @@
 dseg    segment para public 'data'
 
   FichDefaultMaze  db    'maze.txt',0
-
+  fnameptrFich db 'mnamespf.txt',0 ;nome do ficheiro que contem o ponteiro para o ultimo elemento do array com os nomes dos labirintos  
+  fnamenFich db 'mnamesnf.txt',0 ;nome do ficheiro que contem o n de elementos do array com os nomes dos labirintos  
+  mazeNamesFich db 'mnamesf.txt',0 ;nome do ficheiro que contem os nomes dos labirintos
   fname db 390 dup(?) ;vetor de strings, 30*13  30strings de 12+1 char
   fnameptr dw 0 ;ponteiro para o fname
   fnameop db 0 ; fname option, começa a 0 que é o default
@@ -49,6 +51,7 @@ dseg    segment para public 'data'
   FichMazeConfig db 	'mconfig.txt',0
   HandleFich      dw      0
   car_fich        db      ?
+  mazenamesfichErr db 'erro na gravacao dos labirintos$'
 
   string	db	"Teste pr�tico de T.I",0
   Car		db	32
@@ -535,7 +538,130 @@ close:
 	lea	dx, msgErrorClose
 	int	21h
 
-CRIA_FICHEIRO ENDP  ; ------>CRIA UM FICHEIRO<------
+CRIA_FICHEIRO ENDP  ; ----------->cria um ficheiro<---------------------
+
+
+
+fnameptrToFich proc  ; ----------->passa o ptr para o ultimo elemento do array com os labirintos para um ficheiro<---------------------
+	mov	ah, 3ch			; abrir ficheiro para escrita 
+	mov	cx, 00H			; tipo de ficheiro
+	lea	dx, fnameptrfich		; dx contem endereco do nome do ficheiro 
+	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro 
+	jnc	escreve			; se não acontecer erro vai vamos escrever
+	
+	mov	ah, 09h			; Aconteceu erro na leitura
+	lea	dx, mazenamesfichErr
+	int	21h
+	
+	jmp	fim
+	
+escreve:
+	mov	bx, ax			; para escrever BX deve conter o Handle 
+	mov	ah, 40h			; indica que vamos escrever 
+	
+	lea	dx, fnameptr			; Vamos escrever o que estiver no endereço DX
+	mov	cx, 2			; vamos escrever multiplos bytes duma vez só
+	int	21h				; faz a escrita 
+	jnc	close				; se não acontecer erro fecha o ficheiro 
+	
+	mov	ah, 09h
+	lea	dx, msgErrorWrite
+	int	21h
+close:
+	mov	ah,3eh			; indica que vamos fechar
+	int	21h				; fecha mesmo
+	jnc	fim				; se não acontecer erro termina
+	
+	mov	ah, 09h
+	lea	dx, msgErrorClose
+	int	21h
+fim:
+	ret
+	
+fnameptrToFich endp  ; ----------->passa o ptr para o ultimo elemento do array com os labirintos para um ficheiro<---------------------
+
+
+
+fnamenToFich proc   ; ----------->passa o nr de elementos do array com os labirintos para um ficheiro<---------------------
+	mov	ah, 3ch			; abrir ficheiro para escrita 
+	mov	cx, 00H			; tipo de ficheiro
+	lea	dx, fnamenfich		; dx contem endereco do nome do ficheiro 
+	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro 
+	jnc	escreve			; se não acontecer erro vai vamos escrever
+	
+	mov	ah, 09h			; Aconteceu erro na leitura
+	lea	dx, mazenamesfichErr
+	int	21h
+	
+	jmp	fim
+	
+escreve:
+	mov	bx, ax			; para escrever BX deve conter o Handle 
+	mov	ah, 40h			; indica que vamos escrever 
+	
+	lea	dx, fnamen			; Vamos escrever o que estiver no endereço DX
+	mov	cx, 1			; vamos escrever multiplos bytes duma vez só
+	int	21h				; faz a escrita 
+	jnc	close				; se não acontecer erro fecha o ficheiro 
+	
+	mov	ah, 09h
+	lea	dx, msgErrorWrite
+	int	21h
+close:
+	mov	ah,3eh			; indica que vamos fechar
+	int	21h				; fecha mesmo
+	jnc	fim				; se não acontecer erro termina
+	
+	mov	ah, 09h
+	lea	dx, msgErrorClose
+	int	21h
+fim:
+	ret
+
+fnamenToFich endp  ; ----------->passa o nr de elementos do array com os labirintos para um ficheiro<---------------------
+
+
+
+
+fnameToFich proc   ; ----------->passa o array com os labirintos para um ficheiro<---------------------
+	mov	ah, 3ch			; abrir ficheiro para escrita 
+	mov	cx, 00H			; tipo de ficheiro
+	lea	dx, mazenamesfich		; dx contem endereco do nome do ficheiro 
+	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro 
+	jnc	escreve			; se não acontecer erro vai vamos escrever
+	
+	mov	ah, 09h			; Aconteceu erro na leitura
+	lea	dx, mazenamesfichErr
+	int	21h
+	
+	jmp	fim
+	
+escreve:
+	mov	bx, ax			; para escrever BX deve conter o Handle 
+	mov	ah, 40h			; indica que vamos escrever 
+	
+	lea	dx, fname			; Vamos escrever o que estiver no endereço DX
+	mov	cx, 390			; vamos escrever multiplos bytes duma vez só
+	int	21h				; faz a escrita 
+	jnc	close				; se não acontecer erro fecha o ficheiro 
+	
+	mov	ah, 09h
+	lea	dx, msgErrorWrite
+	int	21h
+close:
+	mov	ah,3eh			; indica que vamos fechar
+	int	21h				; fecha mesmo
+	jnc	fim				; se não acontecer erro termina
+	
+	mov	ah, 09h
+	lea	dx, msgErrorClose
+	int	21h
+fim:
+	ret
+
+fnameToFich endp	; ----------->passa o array com os labirintos para um ficheiro<---------------------
+
+
 
 MENUDESENHAR PROC  ;##########################----CRIACAO DE LABIRINTO---####################################
 
@@ -1157,9 +1283,6 @@ IMPRIME:
 LER_SETA:
 	call 	le_tecla
 	cmp		ah, 1
-	je		ESTEND
-	cmp 	al, 27	 ; ESCAPE
-	je		FIM
 	cmp al, 13		 ;enter
 	jne estend
 	cmp posy, 11   ; se o 'x' estiver no back
@@ -1547,7 +1670,12 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   	cmp		ah, 1
   	je		ESTEND
   	cmp 	al, 27	; ESCAPE
-  	je		FIM
+		jne lerop
+	call fnameToFich
+	call fnamenToFich
+	call fnameptrToFich
+	jmp fim
+	lerop:
   ;*************************************
   ; 						ler opcao
 
@@ -1559,7 +1687,13 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   	jmp inicio
   	exit:
   		cmp posy, 21  ; se o 'x' estiver no exit
-  			je fim
+  			jne mazeconfig
+		call fnameToFich
+		call fnamenToFich
+		call fnameptrToFich
+		jmp fim
+		jmp fim
+	mazeconfig:
   	cmp posy, 20 ; se o 'x' estiver no maze config
   		jne estend
   	call menuconfig
