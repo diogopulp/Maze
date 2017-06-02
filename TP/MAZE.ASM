@@ -329,6 +329,22 @@ GUARDA_ECRA ENDP  ; ------>GUARDA ECRA NO BUFFER<------
 
 LE_TECLA	PROC   ; ------>LE UMA TECLA<------
 
+	mov		ah,08h
+	int		21h
+	mov		ah,0
+	cmp		al,0
+	jne		SAI_TECLA
+	mov		ah, 08h
+	int		21h
+	mov		ah,1
+
+sai_tecla:
+  ret
+
+LE_TECLA	ENDP   ; ------>LE UMA TECLA<------
+
+LE_TECLA_CLOCK	PROC   ; ------>LE UMA TECLA CLOCK<------
+
 	;mov		ah,08h
 	;int		21h
 	;mov		ah,0
@@ -359,7 +375,7 @@ LE_TECLA	PROC   ; ------>LE UMA TECLA<------
 sai_tecla:
   ret
 
-LE_TECLA	ENDP   ; ------>LE UMA TECLA<------
+LE_TECLA_CLOCK	ENDP   ; ------>LE UMA TECLA<------
 
 PEDENOMEF PROC  ; ------>PEDE NOME PARA SER ATRIBUIDO AO FICHEIRO<------
 	mov		ax,0B800h
@@ -1353,7 +1369,7 @@ IMPRIME:
   mov 		POSya, al
 
 LER_SETA:
-  call 		LE_TECLA
+  call 		LE_TECLA_CLOCK
   cmp		ah, 1
   je		ESTEND
   cmp 	AL, 27	; ESCAPE
@@ -1522,7 +1538,7 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   		mov 		POSya, al
 
   LER_SETA:
-  	call 	le_tecla
+  	call 	LE_TECLA_CLOCK
   	cmp		ah, 1
   	je		ESTEND
   	cmp 	al, 27	; ESCAPE
