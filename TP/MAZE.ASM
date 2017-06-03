@@ -17,8 +17,8 @@
 dseg    segment para public 'data'
 
   FichDefaultMaze  db    'maze.txt',0
-  fnameptrFich db 'mnamespf.txt',0 ;nome do ficheiro que contem o ponteiro para o ultimo elemento do array com os nomes dos labirintos  
-  fnamenFich db 'mnamesnf.txt',0 ;nome do ficheiro que contem o n de elementos do array com os nomes dos labirintos  
+  fnameptrFich db 'mnamespf.txt',0 ;nome do ficheiro que contem o ponteiro para o ultimo elemento do array com os nomes dos labirintos
+  fnamenFich db 'mnamesnf.txt',0 ;nome do ficheiro que contem o n de elementos do array com os nomes dos labirintos
   mazeNamesFich db 'mnamesf.txt',0 ;nome do ficheiro que contem os nomes dos labirintos
   fname db 390 dup(?) ;vetor de strings, 30*13  30strings de 12+1 char
   fnameptr dw 0 ;ponteiro para o fname
@@ -348,15 +348,6 @@ LE_TECLA	ENDP   ; ------>LE UMA TECLA<------
 
 LE_TECLA_CLOCK	PROC   ; ------>LE UMA TECLA CLOCK<------
 
-	;mov		ah,08h
-	;int		21h
-	;mov		ah,0
-	;cmp		al,0
-	;jne		SAI_TECLA
-	;mov		ah, 08h
-	;int		21h
-	;mov		ah,1
-
   sem_tecla:
   		call Trata_Horas
   		MOV	AH,0BH
@@ -375,8 +366,8 @@ LE_TECLA_CLOCK	PROC   ; ------>LE UMA TECLA CLOCK<------
   		INT	21H
   		MOV	AH,1
 
-sai_tecla:
-  ret
+  sai_tecla:
+    ret
 
 LE_TECLA_CLOCK	ENDP   ; ------>LE UMA TECLA<------
 
@@ -543,27 +534,27 @@ CRIA_FICHEIRO ENDP  ; ----------->cria um ficheiro<---------------------
 
 
 fnameptrToFich proc  ; ----------->passa o ptr para o ultimo elemento do array com os labirintos para um ficheiro<---------------------
-	mov	ah, 3ch			; abrir ficheiro para escrita 
+	mov	ah, 3ch			; abrir ficheiro para escrita
 	mov	cx, 00H			; tipo de ficheiro
-	lea	dx, fnameptrfich		; dx contem endereco do nome do ficheiro 
-	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro 
+	lea	dx, fnameptrfich		; dx contem endereco do nome do ficheiro
+	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro
 	jnc	escreve			; se não acontecer erro vai vamos escrever
-	
+
 	mov	ah, 09h			; Aconteceu erro na leitura
 	lea	dx, mazenamesfichErr
 	int	21h
-	
+
 	jmp	fim
-	
+
 escreve:
-	mov	bx, ax			; para escrever BX deve conter o Handle 
-	mov	ah, 40h			; indica que vamos escrever 
-	
+	mov	bx, ax			; para escrever BX deve conter o Handle
+	mov	ah, 40h			; indica que vamos escrever
+
 	lea	dx, fnameptr			; Vamos escrever o que estiver no endereço DX
 	mov	cx, 2			; vamos escrever multiplos bytes duma vez só
-	int	21h				; faz a escrita 
-	jnc	close				; se não acontecer erro fecha o ficheiro 
-	
+	int	21h				; faz a escrita
+	jnc	close				; se não acontecer erro fecha o ficheiro
+
 	mov	ah, 09h
 	lea	dx, msgErrorWrite
 	int	21h
@@ -571,39 +562,39 @@ close:
 	mov	ah,3eh			; indica que vamos fechar
 	int	21h				; fecha mesmo
 	jnc	fim				; se não acontecer erro termina
-	
+
 	mov	ah, 09h
 	lea	dx, msgErrorClose
 	int	21h
 fim:
 	ret
-	
+
 fnameptrToFich endp  ; ----------->passa o ptr para o ultimo elemento do array com os labirintos para um ficheiro<---------------------
 
 
 
 fnamenToFich proc   ; ----------->passa o nr de elementos do array com os labirintos para um ficheiro<---------------------
-	mov	ah, 3ch			; abrir ficheiro para escrita 
+	mov	ah, 3ch			; abrir ficheiro para escrita
 	mov	cx, 00H			; tipo de ficheiro
-	lea	dx, fnamenfich		; dx contem endereco do nome do ficheiro 
-	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro 
+	lea	dx, fnamenfich		; dx contem endereco do nome do ficheiro
+	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro
 	jnc	escreve			; se não acontecer erro vai vamos escrever
-	
+
 	mov	ah, 09h			; Aconteceu erro na leitura
 	lea	dx, mazenamesfichErr
 	int	21h
-	
+
 	jmp	fim
-	
+
 escreve:
-	mov	bx, ax			; para escrever BX deve conter o Handle 
-	mov	ah, 40h			; indica que vamos escrever 
-	
+	mov	bx, ax			; para escrever BX deve conter o Handle
+	mov	ah, 40h			; indica que vamos escrever
+
 	lea	dx, fnamen			; Vamos escrever o que estiver no endereço DX
 	mov	cx, 1			; vamos escrever multiplos bytes duma vez só
-	int	21h				; faz a escrita 
-	jnc	close				; se não acontecer erro fecha o ficheiro 
-	
+	int	21h				; faz a escrita
+	jnc	close				; se não acontecer erro fecha o ficheiro
+
 	mov	ah, 09h
 	lea	dx, msgErrorWrite
 	int	21h
@@ -611,7 +602,7 @@ close:
 	mov	ah,3eh			; indica que vamos fechar
 	int	21h				; fecha mesmo
 	jnc	fim				; se não acontecer erro termina
-	
+
 	mov	ah, 09h
 	lea	dx, msgErrorClose
 	int	21h
@@ -624,27 +615,27 @@ fnamenToFich endp  ; ----------->passa o nr de elementos do array com os labirin
 
 
 fnameToFich proc   ; ----------->passa o array com os labirintos para um ficheiro<---------------------
-	mov	ah, 3ch			; abrir ficheiro para escrita 
+	mov	ah, 3ch			; abrir ficheiro para escrita
 	mov	cx, 00H			; tipo de ficheiro
-	lea	dx, mazenamesfich		; dx contem endereco do nome do ficheiro 
-	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro 
+	lea	dx, mazenamesfich		; dx contem endereco do nome do ficheiro
+	int	21h				; abre efectivamente e AX vai ficar com o Handle do ficheiro
 	jnc	escreve			; se não acontecer erro vai vamos escrever
-	
+
 	mov	ah, 09h			; Aconteceu erro na leitura
 	lea	dx, mazenamesfichErr
 	int	21h
-	
+
 	jmp	fim
-	
+
 escreve:
-	mov	bx, ax			; para escrever BX deve conter o Handle 
-	mov	ah, 40h			; indica que vamos escrever 
-	
+	mov	bx, ax			; para escrever BX deve conter o Handle
+	mov	ah, 40h			; indica que vamos escrever
+
 	lea	dx, fname			; Vamos escrever o que estiver no endereço DX
 	mov	cx, 390			; vamos escrever multiplos bytes duma vez só
-	int	21h				; faz a escrita 
-	jnc	close				; se não acontecer erro fecha o ficheiro 
-	
+	int	21h				; faz a escrita
+	jnc	close				; se não acontecer erro fecha o ficheiro
+
 	mov	ah, 09h
 	lea	dx, msgErrorWrite
 	int	21h
@@ -652,7 +643,7 @@ close:
 	mov	ah,3eh			; indica que vamos fechar
 	int	21h				; fecha mesmo
 	jnc	fim				; se não acontecer erro termina
-	
+
 	mov	ah, 09h
 	lea	dx, msgErrorClose
 	int	21h
@@ -666,13 +657,13 @@ fnameToFich endp	; ----------->passa o array com os labirintos para um ficheiro<
 fichTofname proc ; ----------->passa o array com os labirintos do ficheiro para o array<---------------------
 ;abre ficheiro
 
-        mov     ah,3dh			; vamos abrir ficheiro para leitura 
-        mov     al,0			; tipo de ficheiro	
+        mov     ah,3dh			; vamos abrir ficheiro para leitura
+        mov     al,0			; tipo de ficheiro
         lea     dx, mazenamesfich		; nome do ficheiro
-        int     21h			; abre para leitura 
-        jc      erro_abrir		; pode aconter erro a abrir o ficheiro 
-        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro 
-        jmp     ler		; depois de abero vamos ler o ficheiro 
+        int     21h			; abre para leitura
+        jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+        jmp     ler		; depois de abero vamos ler o ficheiro
 
 erro_abrir:
         mov     ah,09h
@@ -681,13 +672,13 @@ erro_abrir:
         jmp     sai
 
 ler:
-        mov     ah,3fh			; indica que vai ser lido um ficheiro 
-        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto 
-        mov     cx, 390			; numero de bytes a ler 
+        mov     ah,3fh			; indica que vai ser lido um ficheiro
+        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+        mov     cx, 390			; numero de bytes a ler
         lea     dx, fname		; vai ler para o local de memoria apontado por dx (car_fich)
         int     21h				; faz efectivamente a leitura
-		jc	    erro_ler		; se carry é porque aconteceu um erro 		
-        mov     ah,3eh  ; vamos fechar o ficheiro 
+		jc	    erro_ler		; se carry é porque aconteceu um erro
+        mov     ah,3eh  ; vamos fechar o ficheiro
         mov     bx,HandleFich
         int     21h
         jnc     sai
@@ -699,7 +690,7 @@ ler:
         mov     ah,09h
         lea     dx,Erro_Ler_Msg
         int     21h
-       
+
 sai:
         ret
 fichTofname endp ; ----------->passa o array com os labirintos do ficheiro para o array<---------------------
@@ -709,13 +700,13 @@ fichTofname endp ; ----------->passa o array com os labirintos do ficheiro para 
 fichTofnamen proc ; ----------->passa o nr de elementos do array com os nomes dos mazes para o fnamen<---------------------
 ;abre ficheiro
 
-        mov     ah,3dh			; vamos abrir ficheiro para leitura 
-        mov     al,0			; tipo de ficheiro	
+        mov     ah,3dh			; vamos abrir ficheiro para leitura
+        mov     al,0			; tipo de ficheiro
         lea     dx, fnamenfich		; nome do ficheiro
-        int     21h			; abre para leitura 
-        jc      erro_abrir		; pode aconter erro a abrir o ficheiro 
-        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro 
-        jmp     ler		; depois de abero vamos ler o ficheiro 
+        int     21h			; abre para leitura
+        jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+        jmp     ler		; depois de abero vamos ler o ficheiro
 
 erro_abrir:
         mov     ah,09h
@@ -724,13 +715,13 @@ erro_abrir:
         jmp     sai
 
 ler:
-        mov     ah,3fh			; indica que vai ser lido um ficheiro 
-        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto 
-        mov     cx, 1			; numero de bytes a ler 
+        mov     ah,3fh			; indica que vai ser lido um ficheiro
+        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+        mov     cx, 1			; numero de bytes a ler
         lea     dx, fnamen		; vai ler para o local de memoria apontado por dx (car_fich)
         int     21h				; faz efectivamente a leitura
-			jc	    erro_ler		; se carry é porque aconteceu um erro 		
-        mov     ah,3eh  ; vamos fechar o ficheiro 
+			jc	    erro_ler		; se carry é porque aconteceu um erro
+        mov     ah,3eh  ; vamos fechar o ficheiro
         mov     bx,HandleFich
         int     21h
 			jnc     sai
@@ -742,7 +733,7 @@ ler:
         mov     ah,09h
         lea     dx,Erro_Ler_Msg
         int     21h
-       
+
 sai:
         ret
 
@@ -754,13 +745,13 @@ fichTofnamen endp ; ----------->passa o nr de elementos do array com os nomes do
 fichTofnameptr proc ; ----------->passa o ptr para o ultimo elemento do array com os nomes dos mazes para o fnamen<---------------------
 ;abre ficheiro
 
-        mov     ah,3dh			; vamos abrir ficheiro para leitura 
-        mov     al,0			; tipo de ficheiro	
+        mov     ah,3dh			; vamos abrir ficheiro para leitura
+        mov     al,0			; tipo de ficheiro
         lea     dx, fnameptrfich		; nome do ficheiro
-        int     21h			; abre para leitura 
-        jc      erro_abrir		; pode aconter erro a abrir o ficheiro 
-        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro 
-        jmp     ler		; depois de abero vamos ler o ficheiro 
+        int     21h			; abre para leitura
+        jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+        jmp     ler		; depois de abero vamos ler o ficheiro
 
 erro_abrir:
         mov     ah,09h
@@ -769,13 +760,13 @@ erro_abrir:
         jmp     sai
 
 ler:
-        mov     ah,3fh			; indica que vai ser lido um ficheiro 
-        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto 
-        mov     cx, 2			; numero de bytes a ler 
+        mov     ah,3fh			; indica que vai ser lido um ficheiro
+        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+        mov     cx, 2			; numero de bytes a ler
         lea     dx, fnameptr		; vai ler para o local de memoria apontado por dx (car_fich)
         int     21h				; faz efectivamente a leitura
-			jc	    erro_ler		; se carry é porque aconteceu um erro 		
-        mov     ah,3eh  ; vamos fechar o ficheiro 
+			jc	    erro_ler		; se carry é porque aconteceu um erro
+        mov     ah,3eh  ; vamos fechar o ficheiro
         mov     bx,HandleFich
         int     21h
 			jnc     sai
@@ -787,7 +778,7 @@ ler:
         mov     ah,09h
         lea     dx,Erro_Ler_Msg
         int     21h
-       
+
 sai:
         ret
 
@@ -1497,55 +1488,56 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeY, 1
   goto_xy	MazeX,MazeY
 
+  ; ate aqui esta igual ao MENU
 
-	mov cx, 13
-	xor si, si
-	inicializa:  ;colocar fnameopen toda a zeros
-		mov fnameopen[si], 0
-		inc si
-		loop inicializa
+	;mov cx, 13
+	;xor si, si
+	;inicializa:  ;colocar fnameopen toda a zeros
+		;mov fnameopen[si], 0
+		;inc si
+		;loop inicializa
 
-	mov p, 0
-	xor si, si
-	cmp fnameop, 0
-		jne notdefault
-	strcpy:
-		cmp fichdefaultmaze, 0
-			je openmaze
-		mov al, fichdefaultmaze[si]
-		mov fnameopen[si], al
-		inc si
-		jmp strcpy
-	notdefault:
-		mov al, fnameop
-		dec al ;pq 0 é o mazedefault
-		cmp p, al ;pe é o n de zeros
-			je prepstrcpy2
-		srchzero:
-			cmp fname[si], 0
-				je incp
-			inc si
-			jmp srchzero
-		incp:
-			inc p
-			inc si
-			jmp notdefault
-	prepstrcpy2:
-		xor di, di
-	strcpy2:
-		cmp fname[si], 0
-			je openmaze
-		mov al, fname[si]
-		mov fnameopen[di], al
-		inc si
-		inc di
-		jmp strcpy2
+	;mov p, 0
+	;xor si, si
+	;cmp fnameop, 0
+		;jne notdefault
+	;strcpy:
+		;cmp fichdefaultmaze, 0
+			;je openmaze
+		;mov al, fichdefaultmaze[si]
+		;mov fnameopen[si], al
+		;inc si
+		;jmp strcpy
+	;notdefault:
+		;mov al, fnameop
+		;dec al ;pq 0 é o mazedefault
+		;cmp p, al ;pe é o n de zeros
+			;je prepstrcpy2
+		;srchzero:
+			;cmp fname[si], 0
+				;je incp
+			;inc si
+			;jmp srchzero
+		;incp:
+			;inc p
+			;inc si
+			;jmp notdefault
+	;prepstrcpy2:
+		;xor di, di
+	;strcpy2:
+		;cmp fname[si], 0
+			;je openmaze
+		;mov al, fname[si]
+		;mov fnameopen[di], al
+		;inc si
+		;inc di
+		;jmp strcpy2
 
-  openmaze:
-
+openmaze:
   mov     ah,3dh			; vamos abrir ficheiro para leitura
   mov     al,0			; tipo de ficheiro
-  lea     dx, fnameopen			; nome do ficheiro
+  ;lea     dx, fnameopen			; nome do ficheiro
+  lea     dx, FichDefaultMaze
   int     21h			; abre para leitura
   jc      erro_abrir		; pode aconter erro a abrir o ficheiro
   mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
@@ -1586,7 +1578,7 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov		ax,0B800h
   mov		es,ax
 
-  goto_xy	MazeX,MazeY	; Vai para nova possi��o
+  goto_xy	MazeX,MazeY	; Vai para nova posi��o
   mov 		ah, 08h	; Guarda o Caracter que est� na posi��o do Cursor
   mov		bh,0		; numero da p�gina
   int		10h
@@ -1616,7 +1608,6 @@ CICLO:
   goto_xy	MazeX,MazeY	; Vai para posi��o do cursor
 
 IMPRIME:
-
 
   mov		ah, 02h
   mov		dl, 233	; Coloca AVATAR
@@ -1798,7 +1789,7 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   		mov 		POSya, al
 
   LER_SETA:
-  	call 	LE_TECLA_CLOCK
+  	call 	LE_TECLA
   	cmp		ah, 1
   	je		ESTEND
   	cmp 	al, 27	; ESCAPE
