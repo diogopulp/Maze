@@ -1288,13 +1288,24 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		inc si
 		inc di
 		jmp strcpy
+<<<<<<< HEAD
+<<<<<<< HEAD
 
+	openmaze:
+=======
+=======
+
+>>>>>>> origin/diogo
 	
 	
 	openmaze:
 		mov mazedim, 0
 		goto_xy 0,0
+<<<<<<< HEAD
+>>>>>>> master
+=======
 
+>>>>>>> origin/diogo
 		; imprime ficheiro-----------
 				;abre ficheiro
 
@@ -1340,6 +1351,26 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  mov     ah,3eh
 		  mov     bx,HandleFich
 		  int     21h
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+		 ;--------------------
+
+	getchar:
+		call 	le_tecla
+		cmp 	al, 13	 ; enter
+			ret
+	jmp getchar
+
+=======
+		  
+		 ;------------------------------------------------------------------------------------
+		 
+	call edit_ficheiro
+	ret
+			
+>>>>>>> master
+=======
 
 		  
 		 ;------------------------------------------------------------------------------------
@@ -1347,6 +1378,7 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 	call edit_ficheiro
 	ret
 
+>>>>>>> origin/diogo
 menuEditMaze endp ;##########################----Editar LABIRINTO---####################################
 
 
