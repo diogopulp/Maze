@@ -348,15 +348,6 @@ LE_TECLA	ENDP   ; ------>LE UMA TECLA<------
 
 LE_TECLA_CLOCK	PROC   ; ------>LE UMA TECLA CLOCK<------
 
-	;mov		ah,08h
-	;int		21h
-	;mov		ah,0
-	;cmp		al,0
-	;jne		SAI_TECLA
-	;mov		ah, 08h
-	;int		21h
-	;mov		ah,1
-
   sem_tecla:
   		call Trata_Horas
   		MOV	AH,0BH
@@ -375,8 +366,8 @@ LE_TECLA_CLOCK	PROC   ; ------>LE UMA TECLA CLOCK<------
   		INT	21H
   		MOV	AH,1
 
-sai_tecla:
-  ret
+  sai_tecla:
+    ret
 
 LE_TECLA_CLOCK	ENDP   ; ------>LE UMA TECLA<------
 
@@ -1485,7 +1476,6 @@ CICLO:
 
 IMPRIME:
 
-
   mov		ah, 02h
   mov		dl, 233	; Coloca AVATAR
   int		21H
@@ -1666,7 +1656,7 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   		mov 		POSya, al
 
   LER_SETA:
-  	call 	LE_TECLA_CLOCK
+  	call 	LE_TECLA
   	cmp		ah, 1
   	je		ESTEND
   	cmp 	al, 27	; ESCAPE
