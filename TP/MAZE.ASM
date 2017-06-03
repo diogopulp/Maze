@@ -90,11 +90,20 @@ dseg    segment para public 'data'
   NUMDIG	db	0	; controla o numero de digitos do numero lido
   MAXDIG	db	4	; Constante que define o numero MAXIMO de digitos a ser aceite
 
-  contador db 47; contador de segundos
-  contador2 db 47; contador de segundos pos2
+  segundos1 db 47; contador de segundos
+  segundos2 db 48; contador de segundos pos2
 
-  strcontador db "     $" ;string para ser impressa
-  strcontador2 db "     $" ;string para ser impressa
+  minutos1 db 48; contador de minutos
+  minutos2 db 48; contador de inutos pos2
+
+  strsegundos1 db "     $" ;string para ser impressa
+  strsegundos2 db "     $" ;string para ser impressa
+
+  strminutos1 db "     $" ;string para ser impressa
+  strminutos2 db "     $" ;string para ser impressa
+
+  strzero db "0$"
+  strdoispontos db ":$"
 
 dseg    ends
 
@@ -190,22 +199,35 @@ Trata_Horas PROC
 		mov	Old_seg, ax			; Se segundos são diferentes actualiza informação do tempo
 
 contasegundos:
-    inc contador
-    cmp contador, 9
+    inc segundos1
+    cmp segundos1, 58
       je contasegundos2
-		mov bl, contador
-		mov	strcontador, bl ; isto está bem
-    goto_xy 68,1 ; cato superior direito
-		mostra strcontador
+		mov bl, segundos1
+		mov	strsegundos1, bl ; isto está bem
+    goto_xy 68,1 ; canto superior direito
+		mostra strsegundos1
+    jmp fim_horas
 
 contasegundos2:
-    inc contador2
-    mov contador,0
-    mov bl, contador2
-		mov	strcontador2, bl ; isto está bem
-    goto_xy 67,1 ; cato superior direito
-		mostra strcontador2
+    inc segundos2
+  ;  cmp segundos2, 53
+  ;    je contaminutos
+    mov segundos1,47
+    mov bl, segundos2
+		mov	strsegundos2, bl ; isto está bem
+    goto_xy 67,1 ; canto superior direito
+		mostra strsegundos2
     jmp contasegundos
+
+;contaminutos:
+;    inc minutos1
+;    mov segundos2, 47
+;    mov bl, minutos1
+;    mov strminutos1, bl
+;    goto_xy 65,1
+;    mostra strminutos1
+;    jmp contasegundos
+
 
 
 
@@ -1772,6 +1794,8 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeY, 1
   goto_xy	MazeX,MazeY
 
+
+
   ; ate aqui esta igual ao MENU
 
 	;mov cx, 13
@@ -1868,6 +1892,23 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   int		10h
   mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+
+  ; monta o cornometro
+
+  goto_xy 68,1
+  mostra strzero
+
+  goto_xy 67,1
+  mostra strzero
+
+  goto_xy 66,1
+  mostra strdoispontos
+
+  goto_xy 65,1
+  mostra strzero
+
+  goto_xy 64,1
+  mostra strzero
 
 
 CICLO:
