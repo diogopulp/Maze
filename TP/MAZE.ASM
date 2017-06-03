@@ -16,8 +16,6 @@
 
 dseg    segment para public 'data'
 
-
-	mazedim dw 0
   FichDefaultMaze  db    'maze.txt',0
   fnameptrFich db 'mnamespf.txt',0 ;nome do ficheiro que contem o ponteiro para o ultimo elemento do array com os nomes dos labirintos
   fnamenFich db 'mnamesnf.txt',0 ;nome do ficheiro que contem o n de elementos do array com os nomes dos labirintos
@@ -187,11 +185,11 @@ Trata_Horas PROC
 		call 	Ler_TEMPO				; Horas MINUTOS e segundos do Sistema
 
 		mov	ax, segundos
-		cmp	ax, Old_seg			; VErifica se os segundos mudaram desde a ultima leitura
+		cmp	ax, Old_seg			; Verifica se os segundos mudaram desde a ultima leitura
 		je	fim_horas			; Se a hora não mudou desde a última leitura sai.
 		mov	Old_seg, ax			; Se segundos são diferentes actualiza informação do tempo
 
-contaegundos:
+contasegundos:
     inc contador
     cmp contador, 9
       je contasegundos2
@@ -505,162 +503,6 @@ scanf:
 
 PEDENOMEF ENDP ; ------>PEDE NOME PARA SER ATRIBUIDO AO FICHEIRO<------
 
-
-
-
-edit_ficheiro proc  ;; ------>edita o maze<------
-	mov		Car, 32		;ESPA�O  ;para começar com ' '
-	mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-	mov		dl, car  ; espaco
-	int		21H
-	
-	mov posx, 3
-	mov posy, 3
-	goto_xy posx, posy
-
-CICLO:  ;**************************************
-	cmp posy, 21
-		jne notdown
-	mov posy, 1
-
-notdown:					;manter o y dentro dos limites
-	cmp posy, 0
-		jne notup
-	mov posy, 20
-
-notup:
-	cmp posx, 0			;manter o x dentro dos limites
-		jne notleft
-	mov posx, 40
-notleft:
-	cmp posx, 41
-		jne notright
-	mov posx, 1
-notright:
-
-;**************************************
-	goto_xy	POSx,POSy
-
-IMPRIME:
-	mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-	mov		dl, Car
-	int		21H
-	mov		GChar, al	; Guarda o Caracter que est� na posi��o do Cursor
-	goto_xy	POSx,POSy
-
-	call GUARDA_ECRA
-
-	call CRIA_FICHEIRO2
-
-	call 		LE_TECLA 
-	cmp		ah, 1
-	je		ESTEND
-
-	cmp al, 13  ;enter ----------------------------------
-		jne zero
-	ret
-
-
-ZERO:
-  cmp 		AL, 48		; Tecla 0
-	jne		UM
-	mov		Car, 32		;ESPA�O
-	jmp		CICLO
-
-UM:
-  cmp 		AL, 49		; Tecla 1
-	jne		DOIS
-	mov		Car, 219		;Caracter CHEIO
-	jmp		CICLO
-
-DOIS:
-  cmp AL, 50		; Tecla 2
-	jne	TRES
-	mov Car, 73 ; Define Inicio CHAR 'I'
-	jmp	CICLO
-
-TRES:
-  cmp	AL, 51		; Tecla 3
-	jne	QUATRO
-	mov Car, 70; Define Fim CHAR 'F'
-	jmp	CICLO
-
-QUATRO:
-  cmp AL, 52		; Tecla 4
-	jne	NOVE
-	mov	Car, 32		;epaço, serve para apagar
-	jmp	CICLO
-
-NOVE:		jmp		CICLO
-
-ESTEND:
-  cmp 		al,48h
-	jne		BAIXO
-	dec		POSy		;cima
-	jmp		CICLO
-
-BAIXO:
-	cmp		al,50h
-	jne		ESQUERDA
-	inc 		POSy		;Baixo
-	jmp		CICLO
-
-ESQUERDA:
-	cmp		al,4Bh
-	jne		DIREITA
-	dec		POSx		;Esquerda
-	jmp		CICLO
-
-DIREITA:
-	cmp		al,4Dh
-	jne		CICLO
-	inc		POSx		;Direita
-	jmp		CICLO
-edit_ficheiro endp ; ------>edita UM FICHEIRO<------
-
-
-
-cria_ficheiro2 proc ; ------>CRIA UM FICHEIRO para o edit<------
-	mov	ah, 3ch			; abrir ficheiro para escrita
-	mov	cx, 00H			; tipo de ficheiro
-	
-	lea	dx, fnamedit		; dx contem endereco do nome do ficheiro
-	int	21h					; abre efectivamente e AX vai ficar com o Handle do ficheiro
-
-	jnc	escreve			; se não acontecer erro vamos escrever
-
-	mov	ah, 09h			; Aconteceu erro na leitura
-	lea	dx, msgErrorCreate
-	int	21h
-	ret
-
-escreve:
-	mov	bx, ax			; para escrever BX deve conter o Handle
-	mov	ah, 40h			; indica que vamos escrever
-
-	lea	dx, Buffer			; Vamos escrever o que estiver no endereço DX
-	mov	cx, 3520			; vamos escrever multiplos bytes duma vez só
-
-	int	21h				; faz a escrita
-	jnc	close				; se não acontecer erro fecha o ficheiro
-
-	mov	ah, 09h
-	lea	dx, msgErrorWrite
-	int	21h
-
-close:
-	mov	ah,3eh			; indica que vamos fechar
-	int	21h				; fecha mesmo
-	ret				; se não acontecer erro termina
-
-	mov	ah, 09h
-	lea	dx, msgErrorClose
-	int	21h
-cria_ficheiro2 endp ; ------>CRIA UM FICHEIRO para o edit<------
-
-
-
-
 CRIA_FICHEIRO PROC  ; ------>CRIA UM FICHEIRO<------
 
   mov	ah, 3ch			; abrir ficheiro para escrita
@@ -970,7 +812,7 @@ MENUDESENHAR PROC  ;##########################----CRIACAO DE LABIRINTO---#######
 		mov		ax,0B800h
 		mov		es,ax
 		call		apaga_ecran
-		mov		Car, 32		;ESPA�O  ;para começar com ' '
+		mov		Car, 32		;ESPA�O
 		mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 		mov		dl, car  ; espaco
 		int		21H
@@ -1018,6 +860,8 @@ IMPRIME:
 
 	cmp al, 13  ;enter
 		jne zero
+	mov posx, 25 ;colocar o x no sitio onde vai aparece os menus
+	mov posy, 6
 	ret
 
 
@@ -1289,12 +1133,7 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		inc di
 		jmp strcpy
 
-	
-	
 	openmaze:
-		mov mazedim, 0
-		goto_xy 0,0
-
 		; imprime ficheiro-----------
 				;abre ficheiro
 
@@ -1312,7 +1151,6 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  int     21h
 		  ret
 
-		  
 		ler_ciclo:
 		  mov     ah,3fh			; indica que vai ser lido um ficheiro
 		  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
@@ -1321,14 +1159,10 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  int     21h				; faz efectivamente a leitura
 		  jc	    erro_ler		; se carry é porque aconteceu um erro
 		  cmp	    ax,0			;EOF?	verifica se já estamos no fim do ficheiro
-			je	    fecha_ficheiro	; se EOF fecha o ficheiro
-		  
+		  je	    fecha_ficheiro	; se EOF fecha o ficheiro
 		  mov     ah,02h			; coloca o caracter no ecran
 		  mov	    dl,car_fich		; este é o caracter a enviar para o ecran
 		  int	    21h				; imprime no ecran
-		  inc mazedim
-		  cmp mazedim, 3520 ; 22*80*2   22linhas *80colunas *2bytes
-			jae fecha_ficheiro
 		  jmp	    ler_ciclo		; continua a ler o ficheiro
 
 		erro_ler:
@@ -1341,11 +1175,13 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  mov     bx,HandleFich
 		  int     21h
 
-		  
-		 ;------------------------------------------------------------------------------------
-		 
-	call edit_ficheiro
-	ret
+		 ;--------------------
+
+	getchar:
+		call 	le_tecla
+		cmp 	al, 13	 ; enter
+			ret
+	jmp getchar
 
 menuEditMaze endp ;##########################----Editar LABIRINTO---####################################
 
