@@ -663,6 +663,138 @@ fnameToFich endp	; ----------->passa o array com os labirintos para um ficheiro<
 
 
 
+fichTofname proc ; ----------->passa o array com os labirintos do ficheiro para o array<---------------------
+;abre ficheiro
+
+        mov     ah,3dh			; vamos abrir ficheiro para leitura 
+        mov     al,0			; tipo de ficheiro	
+        lea     dx, mazenamesfich		; nome do ficheiro
+        int     21h			; abre para leitura 
+        jc      erro_abrir		; pode aconter erro a abrir o ficheiro 
+        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro 
+        jmp     ler		; depois de abero vamos ler o ficheiro 
+
+erro_abrir:
+        mov     ah,09h
+        lea     dx,Erro_Open
+        int     21h
+        jmp     sai
+
+ler:
+        mov     ah,3fh			; indica que vai ser lido um ficheiro 
+        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto 
+        mov     cx, 390			; numero de bytes a ler 
+        lea     dx, fname		; vai ler para o local de memoria apontado por dx (car_fich)
+        int     21h				; faz efectivamente a leitura
+		jc	    erro_ler		; se carry é porque aconteceu um erro 		
+        mov     ah,3eh  ; vamos fechar o ficheiro 
+        mov     bx,HandleFich
+        int     21h
+        jnc     sai
+		mov     ah,09h			; o ficheiro pode não fechar correctamente
+        lea     dx,Erro_Close
+        Int     21h
+
+		erro_ler:
+        mov     ah,09h
+        lea     dx,Erro_Ler_Msg
+        int     21h
+       
+sai:
+        ret
+fichTofname endp ; ----------->passa o array com os labirintos do ficheiro para o array<---------------------
+
+
+
+fichTofnamen proc ; ----------->passa o nr de elementos do array com os nomes dos mazes para o fnamen<---------------------
+;abre ficheiro
+
+        mov     ah,3dh			; vamos abrir ficheiro para leitura 
+        mov     al,0			; tipo de ficheiro	
+        lea     dx, fnamenfich		; nome do ficheiro
+        int     21h			; abre para leitura 
+        jc      erro_abrir		; pode aconter erro a abrir o ficheiro 
+        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro 
+        jmp     ler		; depois de abero vamos ler o ficheiro 
+
+erro_abrir:
+        mov     ah,09h
+        lea     dx,Erro_Open
+        int     21h
+        jmp     sai
+
+ler:
+        mov     ah,3fh			; indica que vai ser lido um ficheiro 
+        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto 
+        mov     cx, 1			; numero de bytes a ler 
+        lea     dx, fnamen		; vai ler para o local de memoria apontado por dx (car_fich)
+        int     21h				; faz efectivamente a leitura
+			jc	    erro_ler		; se carry é porque aconteceu um erro 		
+        mov     ah,3eh  ; vamos fechar o ficheiro 
+        mov     bx,HandleFich
+        int     21h
+			jnc     sai
+		mov     ah,09h			; o ficheiro pode não fechar correctamente
+        lea     dx,Erro_Close
+        Int     21h
+
+		erro_ler:
+        mov     ah,09h
+        lea     dx,Erro_Ler_Msg
+        int     21h
+       
+sai:
+        ret
+
+fichTofnamen endp ; ----------->passa o nr de elementos do array com os nomes dos mazes para o fnamen<---------------------
+
+
+
+
+fichTofnameptr proc ; ----------->passa o ptr para o ultimo elemento do array com os nomes dos mazes para o fnamen<---------------------
+;abre ficheiro
+
+        mov     ah,3dh			; vamos abrir ficheiro para leitura 
+        mov     al,0			; tipo de ficheiro	
+        lea     dx, fnameptrfich		; nome do ficheiro
+        int     21h			; abre para leitura 
+        jc      erro_abrir		; pode aconter erro a abrir o ficheiro 
+        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro 
+        jmp     ler		; depois de abero vamos ler o ficheiro 
+
+erro_abrir:
+        mov     ah,09h
+        lea     dx,Erro_Open
+        int     21h
+        jmp     sai
+
+ler:
+        mov     ah,3fh			; indica que vai ser lido um ficheiro 
+        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto 
+        mov     cx, 2			; numero de bytes a ler 
+        lea     dx, fnameptr		; vai ler para o local de memoria apontado por dx (car_fich)
+        int     21h				; faz efectivamente a leitura
+			jc	    erro_ler		; se carry é porque aconteceu um erro 		
+        mov     ah,3eh  ; vamos fechar o ficheiro 
+        mov     bx,HandleFich
+        int     21h
+			jnc     sai
+		mov     ah,09h			; o ficheiro pode não fechar correctamente
+        lea     dx,Erro_Close
+        Int     21h
+
+		erro_ler:
+        mov     ah,09h
+        lea     dx,Erro_Ler_Msg
+        int     21h
+       
+sai:
+        ret
+
+fichTofnameptr endp ; ----------->passa o ptr para o ultimo elemento do array com os nomes dos mazes para o fnamen<---------------------
+
+
+
 MENUDESENHAR PROC  ;##########################----CRIACAO DE LABIRINTO---####################################
 
     call pedeNomeF
@@ -1199,7 +1331,7 @@ erro_abrir:
 	mov     ah,09h
 	lea     dx,Erro_Open
 	int     21h
-;    jmp     sai
+    jmp     fim
 
 ler_ciclo:
 	mov     ah,3fh			    ; indica que vai ser lido um ficheiro
@@ -1585,7 +1717,7 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   	mov     ah,09h
   	lea     dx,Erro_Open
   	int     21h
-  ;    jmp     sai
+    jmp     fim
 
   ler_ciclo:
   	mov     ah,3fh			    ; indica que vai ser lido um ficheiro
@@ -1724,8 +1856,10 @@ MENU ENDP ;##########################----MENU PRINCIPAL---######################
 MAIN PROC ;###############################----MAIN---#########################################
   mov     ax,DSEG
   mov     ds,ax
-
-  call MENU
+	call fichTofname
+	call fichTofnamen
+	call fichTofnameptr
+	call MENU
   ;;call teclanum
 
 MAIN  ENDP ;###############################----MAIN---########################################
