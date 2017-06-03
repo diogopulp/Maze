@@ -22,13 +22,15 @@ dseg    segment para public 'data'
   mazeNamesFich db 'mnamesf.txt',0 ;nome do ficheiro que contem os nomes dos labirintos
   fname db 390 dup(?) ;vetor de strings, 30*13  30strings de 12+1 char
   fnameptr dw 0 ;ponteiro para o fname
-  fnameop db 0 ; fname option, começa a 0 que é o default
+  fnameop db 0 ; fname option, começa a 0 que é o default, é a o labirinto a carregar no play
+  fnameditop db 0 ; o labirinto a editar
   fnamen db 0	; n elementos do fname
   p db 0 ; ponteiro
   pant db 0
   zeros db 0
   lastzero dw 0
   fnameopen db 13 dup(?)
+  fnamedit db 13 dup(?)
   Cor		           db	   7	; Guarda os atributos de cor do caracter
   POSya		         db	   5	; Posi��o anterior de y
   POSxa		         db	   10	; Posi��o anterior de x
@@ -43,6 +45,7 @@ dseg    segment para public 'data'
   string2 db "Choose your maze:", 0
   string3 db "Default Maze has been choosen!", 0
   string4 db "Delete Maze:", 0
+  string5 db "Edit Maze:", 0
 
   Erro_Open       db      'Erro ao tentar abrir o ficheiro$'
   Erro_Ler_Msg    db      'Erro ao tentar ler do ficheiro$'
@@ -904,6 +907,270 @@ DIREITA:
 MENUDESENHAR ENDP ;##########################----CRIACAO DE LABIRINTO---####################################
 
 
+
+menuEditMaze proc ;##########################----Editar LABIRINTO---####################################
+	mov		ax,0B800h
+	mov		es,ax
+	call apaga_ecran
+	mov posy, 2
+	mov posx, 10
+	goto_xy	POSx,POSy
+	xor si, si ;si=0
+	mov ax, fnameptr
+	mov lastzero, ax
+	dec lastzero
+	titulo:
+		cmp string5[si], 0
+			je checkelements
+		mov ah, 02h
+		mov dl, string5[si]
+		int 21h
+		inc si
+		jmp titulo
+
+	checkelements:
+		cmp fnamen, 0
+			jne mazesinic
+		mov posy, 2
+		mov posx, 20
+		goto_xy	POSx,POSy
+		jmp lerop
+
+	mazesinic:
+		mov posy, 3
+		mov posx, 20
+		goto_xy	POSx,POSy
+		mov ah, 02h
+		mov dl, 91 ;[
+		int 21h
+		mov ah, 02h
+		mov dl, 32 ; espaco
+		int 21h
+		mov ah, 02h
+		mov dl, 93 ;]
+		int 21h
+		xor si, si ;si=0
+	mazes:
+
+		cmp fname[si], 0
+			jne notnline
+		cmp lastzero, si
+			je lerOp
+		inc posy
+		goto_xy	POSx,POSy
+		inc si
+		mov ah, 02h
+		mov dl, 91 ;[
+		int 21h
+		mov ah, 02h
+		mov dl, 32 ; espaco
+		int 21h
+		mov ah, 02h
+		mov dl, 93 ;]
+		int 21h
+		jmp mazes
+		notnline:
+			mov ah, 02h
+			mov dl, fname[si]
+			int 21h
+			inc si
+			jmp mazes
+
+	lerOp:
+		inc posy
+		goto_xy	POSx,POSy
+		mov ah, 02h
+		mov dl, 91 ;[
+		int 21h
+		mov ah, 02h
+		mov dl, 32 ; espaco
+		int 21h
+		mov ah, 02h
+		mov dl, 93 ;]
+		int 21h
+		mov ah, 02h
+		mov dl, 66 ; b
+		int 21h
+		mov ah, 02h
+		mov dl, 65 ; a
+		int 21h
+		mov ah, 02h
+		mov dl, 67 ; c
+		int 21h
+		mov ah, 02h
+		mov dl, 75 ; k
+		int 21h
+		mov posy, 3
+		mov posx, 21  ;meter o x dentro do []
+		goto_xy	POSx,POSy
+
+		CICLO:
+			mov al, fnamen
+			add al, 4  ;
+			cmp posy, al
+				jne snake
+			mov posy, 3 ;posicao inicial
+
+			snake:					;manter o 'x' dentro dos limites
+				cmp posy, 2
+					jne fimsnake
+				dec al
+				mov posy, al
+
+			fimsnake:
+			;**************************************
+
+				goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+
+				mov		ah, 02h
+				mov		dl, Car	; Repoe Caracter guardado
+				int		21H
+
+				goto_xy	POSx,POSy	; Vai para nova possi��o
+				mov 	ah, 08h
+				mov		bh,0		; numero da p�gina
+				int		10h
+				mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
+				mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+
+				goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
+				mov		ah, 02h	; IMPRIME caracter da posi��o no canto
+				mov		dl, Car
+				int		21H
+
+				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+
+			IMPRIME:
+				mov		ah, 02h
+				mov		dl, 120	; Coloca AVATAR x -> 120
+				int		21H
+				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+
+				mov		al, POSx	; Guarda a posi��o do cursor
+				mov		POSxa, al
+				mov		al, POSy	; Guarda a posi��o do cursor
+				mov 	POSya, al
+
+			LER_SETA:
+				call 	le_tecla
+				cmp		ah, 1
+					je		ESTEND
+				cmp al, 13		 ;enter--------------------------------------
+					jne estend
+				mov al, fnamen
+				add al, 3	; +3 onde começa
+				cmp posy, al   ; se o 'x' estiver no back
+					jne qualmaze
+				ret
+				qualmaze:
+						mov al, posy
+						mov fnameditop, al
+						sub fnameditop, 2  ;-2 porque o 0 é o default
+						jmp guessMaze
+
+			ESTEND:
+				cmp 	al,48h
+				jne		BAIXO
+				dec		POSy		;cima
+				jmp		CICLO
+
+			BAIXO:
+				cmp		al,50h
+				jne		ciclo
+				inc 	POSy		;Baixo
+				jmp		CICLO
+
+				
+	guessMaze:		
+		;descobrir fnamedit -------------------
+		mov cx, 13
+		xor si, si
+		xor di, di
+	inicializa:  ;colocar fnamedit toda a zeros
+		mov fnamedit[si], 0
+		inc si
+			loop inicializa
+
+		mov p, 0 ;p e um ponteiro
+		xor si, si
+	pset:  ;vamos descobrir onde esta o nome do ficheiro correspondente á opçao
+		mov al, fnameditop
+		dec al ;pq 0 é o mazedefault
+		cmp p, al ;p é o n de zeros
+			je strcpy
+		srchzero:
+			cmp fname[si], 0
+				je incp
+			inc si
+			jmp srchzero
+		incp:
+			inc p
+			inc si
+			jmp pset
+	strcpy:
+		cmp fname[si], 0
+			je openmaze
+		mov al, fname[si]
+		mov fnamedit[di], al
+		inc si
+		inc di
+		jmp strcpy
+	
+	openmaze:			
+		; imprime ficheiro-----------
+				;abre ficheiro
+
+		  mov     ah,3dh			; vamos abrir ficheiro para leitura
+		  mov     al,0			; tipo de ficheiro
+		  lea     dx, fnamedit			; nome do ficheiro
+		  int     21h			; abre para leitura
+		  jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+		  mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+		  jmp     ler_ciclo		; depois de abero vamos ler o ficheiro
+
+		erro_abrir:
+		  mov     ah,09h
+		  lea     dx,Erro_Open
+		  int     21h
+		  ret
+
+		ler_ciclo:
+		  mov     ah,3fh			; indica que vai ser lido um ficheiro
+		  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+		  mov     cx,1			; numero de bytes a ler
+		  lea     dx,car_fich		; vai ler para o local de memoria apontado por dx (car_fich)
+		  int     21h				; faz efectivamente a leitura
+		  jc	    erro_ler		; se carry é porque aconteceu um erro
+		  cmp	    ax,0			;EOF?	verifica se já estamos no fim do ficheiro
+		  je	    fecha_ficheiro	; se EOF fecha o ficheiro
+		  mov     ah,02h			; coloca o caracter no ecran
+		  mov	    dl,car_fich		; este é o caracter a enviar para o ecran
+		  int	    21h				; imprime no ecran
+		  jmp	    ler_ciclo		; continua a ler o ficheiro
+
+		erro_ler:
+		  mov     ah,09h
+		  lea     dx,Erro_Ler_Msg
+		  int     21h
+
+		fecha_ficheiro:					; vamos fechar o ficheiro
+		  mov     ah,3eh
+		  mov     bx,HandleFich
+		  int     21h
+		  
+		 ;--------------------
+		 
+	getchar:
+		call 	le_tecla
+		cmp 	al, 13	 ; enter
+			ret
+	jmp getchar
+		
+menuEditMaze endp ;##########################----Editar LABIRINTO---####################################
+
+
+
+
 menuLoadUmaze proc   ;##########################----carregar labirinto---####################################
 
 	call apaga_ecran
@@ -1448,16 +1715,16 @@ loadDefaultMaze:
 		cmp 	al, 13	 ; enter
 			je		inicio
 	jmp getchar
+	
 deletemaze:
-
 	cmp posy, 10 ;se o x estiver no delete maze
 		jne editmaze
 	call menudeletemaze
 	jmp inicio
 
 editmaze:
-
-	jmp		LER_SETA
+	call menueditmaze
+	jmp inicio
 
 ESTEND:
 	cmp 	al,48h
@@ -1500,7 +1767,7 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
 	;mov p, 0
 	;xor si, si
 	;cmp fnameop, 0
-		;jne notdefault
+		;jne notdefault  ;vamos descobrir onde esta o nome do ficheiro correspondente á opçao
 	;strcpy:
 		;cmp fichdefaultmaze, 0
 			;je openmaze
