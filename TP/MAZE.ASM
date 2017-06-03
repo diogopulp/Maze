@@ -93,7 +93,10 @@ dseg    segment para public 'data'
   MAXDIG	db	4	; Constante que define o numero MAXIMO de digitos a ser aceite
 
   contador db 47; contador de segundos
+  contador2 db 47; contador de segundos pos2
+
   strcontador db "     $" ;string para ser impressa
+  strcontador2 db "     $" ;string para ser impressa
 
 dseg    ends
 
@@ -188,12 +191,26 @@ Trata_Horas PROC
 		je	fim_horas			; Se a hora não mudou desde a última leitura sai.
 		mov	Old_seg, ax			; Se segundos são diferentes actualiza informação do tempo
 
+contaegundos:
     inc contador
+    cmp contador, 9
+      je contasegundos2
 		mov bl, contador
 		mov	strcontador, bl ; isto está bem
-
     goto_xy 68,1 ; cato superior direito
 		mostra strcontador
+
+contasegundos2:
+    inc contador2
+    mov contador,0
+    mov bl, contador2
+		mov	strcontador2, bl ; isto está bem
+    goto_xy 67,1 ; cato superior direito
+		mostra strcontador2
+    jmp contasegundos
+
+
+
 
 fim_horas:
 		goto_xy	POSx,POSy			; Volta a colocar o cursor onde estava antes de actualizar as horas
@@ -1236,8 +1253,8 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 				inc 	POSy		;Baixo
 				jmp		CICLO
 
-				
-	guessMaze:		
+
+	guessMaze:
 		;descobrir fnamedit -------------------
 		mov cx, 13
 		xor si, si
@@ -1271,11 +1288,13 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		inc si
 		inc di
 		jmp strcpy
+
 	
 	
 	openmaze:
 		mov mazedim, 0
 		goto_xy 0,0
+
 		; imprime ficheiro-----------
 				;abre ficheiro
 
@@ -1321,12 +1340,13 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  mov     ah,3eh
 		  mov     bx,HandleFich
 		  int     21h
+
 		  
 		 ;------------------------------------------------------------------------------------
 		 
 	call edit_ficheiro
 	ret
-			
+
 menuEditMaze endp ;##########################----Editar LABIRINTO---####################################
 
 
@@ -1876,7 +1896,7 @@ loadDefaultMaze:
 		cmp 	al, 13	 ; enter
 			je		inicio
 	jmp getchar
-	
+
 deletemaze:
 	cmp posy, 10 ;se o x estiver no delete maze
 		jne editmaze
