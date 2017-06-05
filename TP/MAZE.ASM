@@ -210,26 +210,51 @@ contasegundos:
 
 contasegundos2:
     inc segundos2
-  ;  cmp segundos2, 53
-  ;    je contaminutos
-    mov segundos1,47
+    cmp segundos2, 54
+      je contaminutos
+    mov segundos1,47 ; repoe os segundos1
     mov bl, segundos2
 		mov	strsegundos2, bl ; isto está bem
     goto_xy 67,1 ; canto superior direito
 		mostra strsegundos2
     jmp contasegundos
 
-;contaminutos:
-;    inc minutos1
-;    mov segundos2, 47
-;    mov bl, minutos1
-;    mov strminutos1, bl
-;    goto_xy 65,1
-;    mostra strminutos1
-;    jmp contasegundos
+contaminutos:
+    inc minutos1
+    cmp minutos1, 58
+      je contaminutos2
+    mov segundos1, 47 ; repoe segundos1
+    mov segundos2, 48 ; repoe segundos2
+    mov bl, minutos1
+    mov strminutos1, bl
+    goto_xy 65,1
+    mostra strminutos1
+    goto_xy 66,1
+    mostra strdoispontos
+    goto_xy 67,1
+    mostra segundos2
+    goto_xy 68,1
+    mostra segundos1
+    jmp contasegundos
 
-
-
+contaminutos2:
+    inc minutos2
+    mov minutos1, 47 ; repoe minutos1
+    mov segundos1, 47 ; repoe segundos1
+    mov segundos2, 48 ; repoe segundos2
+    mov bl, minutos2
+    mov strminutos2, bl
+    goto_xy 64,1
+    mostra strminutos2
+    goto_xy 65,1
+    mostra strminutos1
+    goto_xy 66,1
+    mostra strdoispontos
+    goto_xy 67,1
+    mostra segundos2
+    goto_xy 68,1
+    mostra segundos1
+    jmp contaminutos
 
 
 fim_horas:
@@ -1794,7 +1819,11 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeY, 1
   goto_xy	MazeX,MazeY
 
+  mov segundos1,47
+  mov segundos2,48
 
+  mov minutos1,48
+  mov minutos2,48
 
   ; ate aqui esta igual ao MENU
 
