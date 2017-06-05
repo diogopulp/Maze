@@ -1990,7 +1990,7 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeX, 1
   mov MazeY, 1
   goto_xy	MazeX,MazeY
-
+  
   mov segundos1,47
   mov segundos2,48
 
@@ -2043,6 +2043,8 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
 		;jmp strcpy2
 
 openmaze:
+  mov mazedim, 0
+  goto_xy 0,0
   mov     ah,3dh			; vamos abrir ficheiro para leitura
   mov     al,0			; tipo de ficheiro
   ;lea     dx, fnameopen			; nome do ficheiro
@@ -2066,10 +2068,13 @@ ler_ciclo:
   int     21h				; faz efectivamente a leitura
   jc	    erro_ler		; se carry é porque aconteceu um erro
   cmp	    ax,0			;EOF?	verifica se já estamos no fim do ficheiro
-  je	    fecha_ficheiro	; se EOF fecha o ficheiro
+	je	    fecha_ficheiro	; se EOF fecha o ficheiro
   mov     ah,02h			; coloca o caracter no ecran
   mov	    dl,car_fich		; este é o caracter a enviar para o ecran
   int	    21h				; imprime no ecran
+  inc mazedim
+   cmp mazedim, 3520 ; 22*80*2   22linhas *80colunas *2bytes
+		jae fecha_ficheiro
   jmp	    ler_ciclo		; continua a ler o ficheiro
 
 erro_ler:
@@ -2110,8 +2115,28 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   goto_xy 64,1
   mostra strzero
 
-CICLO:
+CICLO: 
+;***********************************************************
+		cmp mazey, 21
+			jne notdown
+		mov mazey, 1
 
+	notdown:					;manter o y dentro dos limites
+		cmp mazey, 0
+			jne notup
+		mov mazey, 20
+
+	notup:
+		cmp mazex, 0			;manter o x dentro dos limites
+			jne notleft
+		mov mazex, 40
+	notleft:
+		cmp mazex, 41
+			jne notright
+		mov mazex, 1
+	notright:
+	goto_xy	mazex,mazey
+;*****************************************************
   goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
   mov		ah, 02h
   mov		dl, Car	; Repoe Caracter guardado
