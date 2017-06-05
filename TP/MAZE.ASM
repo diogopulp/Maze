@@ -35,6 +35,9 @@ dseg    segment para public 'data'
   POSya		         db	   5	; Posi��o anterior de y
   POSxa		         db	   10	; Posi��o anterior de x
 
+  POSyp db 0 ; proxima posicao y
+  POSxp db 0 ; proxima posicao
+
   MazeX            db    1
   MazeY            db    1
 
@@ -1923,7 +1926,6 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
   ; monta o cornometro
-
   goto_xy 68,1
   mostra strzero
 
@@ -1939,7 +1941,6 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   goto_xy 64,1
   mostra strzero
 
-
 CICLO:
 
   goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
@@ -1947,19 +1948,31 @@ CICLO:
   mov		dl, Car	; Repoe Caracter guardado
   int		21H
 
-  goto_xy	MazeX,MazeY	; Vai para nova possi��o
-  mov 		ah, 08h
-  mov		bh,0		; numero da p�gina
+  goto_xy	MazeX,MazeY	; Vai para nova posição
+  mov 	ah, 08h
+  mov		bh, 0		; numero da p�gina
   int		10h
   mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
-  goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
-  mov		ah, 02h	; IMPRIME caracter da posi��o no canto
-  mov		dl, Car
-  int		21H
+  ;cmp Car,
 
-  goto_xy	MazeX,MazeY	; Vai para posi��o do cursor
+  cmp Car,20h  ;compara com espaço
+	 jne parede  ; se não for espaço é parede
+	jmp imprime
+
+parede:
+
+		goto_xy POSxa,POSya
+		mov ch,POSxa
+		mov MazeX,ch
+		mov ch,POSya
+		mov MazeY,ch
+
+  ;goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
+  ;mov		ah, 02h	; IMPRIME caracter da posi��o no canto
+  ;mov		dl, Car
+  ;int		21H
 
 IMPRIME:
 
@@ -1971,67 +1984,39 @@ IMPRIME:
   mov		al, MazeX	; Guarda a posi��o do cursor
   mov		POSxa, al
   mov		al, MazeY	; Guarda a posi��o do cursor
-  mov 		POSya, al
+  mov 	POSya, al
 
 LER_SETA:
-  call 		LE_TECLA_CLOCK
+  call 	LE_TECLA_CLOCK
   cmp		ah, 1
-  je		ESTEND
-  cmp 	AL, 27	; ESCAPE
-  je		FIM
+    je		CIMA
+  cmp 	al, 27	; ESCAPE
+    je		FIM
   jmp		LER_SETA
 
-ESTEND:
+CIMA:
   cmp 	al,48h
-  jne		BAIXO
+    jne		BAIXO
   dec		MazeY		;cima
-  cmp   Car, 219 ; Parede
-  je    PAREDECIMA
   jmp		CICLO
 
 BAIXO:
   cmp		al,50h
-  jne		ESQUERDA
+    jne		ESQUERDA
   inc 	MazeY		;Baixo
-  cmp   Car, 219 ; Parede
-  je    PAREDEBAIXO
   jmp		CICLO
 
 ESQUERDA:
   cmp		al,4Bh
-  jne		DIREITA
+    jne		DIREITA
   dec		MazeX		;Esquerda
-  cmp   Car, 219 ; Parede
-  je    PAREDEESQUERDA
   jmp		CICLO
 
 DIREITA:
   cmp		al,4Dh
-  jne		LER_SETA
+    jne		LER_SETA
   inc		MazeX		;Direita
-  cmp   Car, 219 ; Parede
-  je    PAREDEDIREITA
   jmp		CICLO
-
-PAREDECIMA:
-  inc MazeY
-  ;call menu
-  ret
-
-PAREDEBAIXO:
-  dec MazeY
-  ;call menu
-  ret
-
-PAREDEESQUERDA:
-  inc MazeX
-  ;call menu
-  ret
-
-PAREDEDIREITA:
-  dec MazeX
-  ;call menu
-  ret
 
 fim:
 	mov		ah,4CH
