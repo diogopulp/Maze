@@ -135,6 +135,12 @@ MOSTRA MACRO STR
   lea dx,STR
   int 21H
 ENDM
+
+GRAVATEMPO MACRO NOME, TEMP
+
+; QUERIA POR AQUI O GAJO A GRAVAR O NOME E O TEMPO
+
+ENDM
 ;MACROS
 
 apaga_ecran	proc
@@ -715,10 +721,6 @@ close:
 	lea	dx, msgErrorClose
 	int	21h
 cria_ficheiro2 endp ; ------>CRIA UM FICHEIRO para o edit<------
-
-
-
-
 
 
 CRIA_FICHEIRO PROC  ; ------>CRIA UM FICHEIRO<------
@@ -2236,6 +2238,7 @@ DIREITA:
   jmp		CICLO
 
 TEMPOTOTAL:
+  ; Mostra no ecrã
   call apaga_ecran
   goto_xy 35,11
   mostra strTEMPOTOTAL ; String fixa TEMPOTOTAL
