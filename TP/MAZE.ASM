@@ -561,7 +561,7 @@ edit_ficheiro proc  ;; ------>edita o maze<------
 	mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
 	mov		dl, car  ; espaco
 	int		21H
-	
+
 	mov posx, 3
 	mov posy, 3
 	goto_xy posx, posy
@@ -600,7 +600,7 @@ IMPRIME:
 
 	call CRIA_FICHEIRO2
 
-	call 		LE_TECLA 
+	call 		LE_TECLA
 	cmp		ah, 1
 	je		ESTEND
 
@@ -674,7 +674,7 @@ edit_ficheiro endp ; ------>edita UM FICHEIRO<------
 cria_ficheiro2 proc ; ------>CRIA UM FICHEIRO para o edit<------
 	mov	ah, 3ch			; abrir ficheiro para escrita
 	mov	cx, 00H			; tipo de ficheiro
-	
+
 	lea	dx, fnamedit		; dx contem endereco do nome do ficheiro
 	int	21h					; abre efectivamente e AX vai ficar com o Handle do ficheiro
 
@@ -1311,8 +1311,8 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 				inc 	POSy		;Baixo
 				jmp		CICLO
 
-				
-	guessMaze:		
+
+	guessMaze:
 		;descobrir fnamedit -------------------
 		mov cx, 13
 		xor si, si
@@ -1346,8 +1346,8 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		inc si
 		inc di
 		jmp strcpy
-	
-	
+
+
 	openmaze:
 		mov mazedim, 0
 		goto_xy 0,0
@@ -1368,7 +1368,7 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  int     21h
 		  ret
 
-		  
+
 		ler_ciclo:
 		  mov     ah,3fh			; indica que vai ser lido um ficheiro
 		  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
@@ -1378,7 +1378,7 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  jc	    erro_ler		; se carry é porque aconteceu um erro
 		  cmp	    ax,0			;EOF?	verifica se já estamos no fim do ficheiro
 			je	    fecha_ficheiro	; se EOF fecha o ficheiro
-		  
+
 		  mov     ah,02h			; coloca o caracter no ecran
 		  mov	    dl,car_fich		; este é o caracter a enviar para o ecran
 		  int	    21h				; imprime no ecran
@@ -1396,9 +1396,9 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 		  mov     ah,3eh
 		  mov     bx,HandleFich
 		  int     21h
-		  
+
 		 ;------------------------------------------------------------------------------------
-		 
+
 	call edit_ficheiro
 	ret
 
@@ -1990,7 +1990,7 @@ PLAY PROC ;##########################----INICIA O JOGO---#######################
   mov MazeX, 1
   mov MazeY, 1
   goto_xy	MazeX,MazeY
-  
+
   mov segundos1,47
   mov segundos2,48
 
@@ -2115,7 +2115,7 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   goto_xy 64,1
   mostra strzero
 
-CICLO: 
+CICLO:
 ;***********************************************************
 		cmp mazey, 21
 			jne notdown
@@ -2137,6 +2137,7 @@ CICLO:
 	notright:
 	goto_xy	mazex,mazey
 ;*****************************************************
+
   goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
   mov		ah, 02h
   mov		dl, Car	; Repoe Caracter guardado
@@ -2146,22 +2147,24 @@ CICLO:
   mov 	ah, 08h
   mov		bh, 0		; numero da p�gina
   int		10h
+
   mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
-
-  ;cmp Car,
 
   cmp Car,20h  ;compara com espaço
 	 jne parede  ; se não for espaço é parede
 	jmp imprime
 
+
+
 parede:
 
-		goto_xy POSxa,POSya
-		mov ch,POSxa
-		mov MazeX,ch
-		mov ch,POSya
-		mov MazeY,ch
+	goto_xy POSxa,POSya ; vai para a posição anterior
+  mov Car, 20h
+	mov ch,POSxa
+	mov MazeX,ch
+	mov ch,POSya
+	mov MazeY,ch
 
   ;goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
   ;mov		ah, 02h	; IMPRIME caracter da posi��o no canto
