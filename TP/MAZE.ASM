@@ -95,6 +95,10 @@ dseg    segment para public 'data'
   NUMDIG	db	0	; controla o numero de digitos do numero lido
   MAXDIG	db	4	; Constante que define o numero MAXIMO de digitos a ser aceite
 
+  tempopartida db 0 ; cornometro da partida
+  strTEMPOTOTAL db "Tempo Total:$"
+  strtempopartida db "     $"; string para ser impressa
+
   segundos1 db 47; contador de segundos
   segundos2 db 48; contador de segundos pos2
 
@@ -190,76 +194,79 @@ LER_TEMPO   ENDP
 
 Trata_Horas PROC
 
-    pushf
-    push ax
-    push bx
-    push cx
-    push dx
+  pushf
+  push ax
+  push bx
+  push cx
+  push dx
 
-		call 	Ler_TEMPO				; Horas MINUTOS e segundos do Sistema
+  call 	Ler_TEMPO				; Horas MINUTOS e segundos do Sistema
 
-		mov	ax, segundos
-		cmp	ax, Old_seg			; Verifica se os segundos mudaram desde a ultima leitura
-		je	fim_horas			; Se a hora não mudou desde a última leitura sai.
-		mov	Old_seg, ax			; Se segundos são diferentes actualiza informação do tempo
+  mov	ax, segundos
+  cmp	ax, Old_seg			; Verifica se os segundos mudaram desde a ultima leitura
+  je	fim_horas			; Se a hora não mudou desde a última leitura sai.
+  mov	Old_seg, ax			; Se segundos são diferentes actualiza informação do tempo
 
 contasegundos:
-    inc segundos1
-    cmp segundos1, 58
-      je contasegundos2
-		mov bl, segundos1
-		mov	strsegundos1, bl ; isto está bem
-    goto_xy 68,1 ; canto superior direito
-		mostra strsegundos1
-    jmp fim_horas
+
+  inc tempopartida ; tempo total de cada partida em segundos
+
+  inc segundos1
+  cmp segundos1, 58
+    je contasegundos2
+  mov bl, segundos1
+  mov	strsegundos1, bl ; isto está bem
+  goto_xy 68,1 ; canto superior direito
+  mostra strsegundos1
+  jmp fim_horas
 
 contasegundos2:
-    inc segundos2
-    cmp segundos2, 54
-      je contaminutos
-    mov segundos1,47 ; repoe os segundos1
-    mov bl, segundos2
-		mov	strsegundos2, bl ; isto está bem
-    goto_xy 67,1 ; canto superior direito
-		mostra strsegundos2
-    jmp contasegundos
+  inc segundos2
+  cmp segundos2, 54
+    je contaminutos
+  mov segundos1,47 ; repoe os segundos1
+  mov bl, segundos2
+  mov	strsegundos2, bl ; isto está bem
+  goto_xy 67,1 ; canto superior direito
+  mostra strsegundos2
+  jmp contasegundos
 
 contaminutos:
-    inc minutos1
-    cmp minutos1, 58
-      je contaminutos2
-    mov segundos1, 47 ; repoe segundos1
-    mov segundos2, 48 ; repoe segundos2
-    mov bl, minutos1
-    mov strminutos1, bl
-    goto_xy 65,1
-    mostra strminutos1
-    goto_xy 66,1
-    mostra strdoispontos
-    goto_xy 67,1
-    mostra segundos2
-    goto_xy 68,1
-    mostra segundos1
-    jmp contasegundos
+  inc minutos1
+  cmp minutos1, 58
+    je contaminutos2
+  mov segundos1, 47 ; repoe segundos1
+  mov segundos2, 48 ; repoe segundos2
+  mov bl, minutos1
+  mov strminutos1, bl
+  goto_xy 65,1
+  mostra strminutos1
+  goto_xy 66,1
+  mostra strdoispontos
+  goto_xy 67,1
+  mostra segundos2
+  goto_xy 68,1
+  mostra segundos1
+  jmp contasegundos
 
 contaminutos2:
-    inc minutos2
-    mov minutos1, 47 ; repoe minutos1
-    mov segundos1, 47 ; repoe segundos1
-    mov segundos2, 48 ; repoe segundos2
-    mov bl, minutos2
-    mov strminutos2, bl
-    goto_xy 64,1
-    mostra strminutos2
-    goto_xy 65,1
-    mostra strminutos1
-    goto_xy 66,1
-    mostra strdoispontos
-    goto_xy 67,1
-    mostra segundos2
-    goto_xy 68,1
-    mostra segundos1
-    jmp contaminutos
+  inc minutos2
+  mov minutos1, 47 ; repoe minutos1
+  mov segundos1, 47 ; repoe segundos1
+  mov segundos2, 48 ; repoe segundos2
+  mov bl, minutos2
+  mov strminutos2, bl
+  goto_xy 64,1
+  mostra strminutos2
+  goto_xy 65,1
+  mostra strminutos1
+  goto_xy 66,1
+  mostra strdoispontos
+  goto_xy 67,1
+  mostra segundos2
+  goto_xy 68,1
+  mostra segundos1
+  jmp contaminutos
 
 
 fim_horas:
@@ -422,21 +429,21 @@ LE_TECLA_CLOCK	PROC   ; ------>LE UMA TECLA CLOCK<------
 
   sem_tecla:
   		call Trata_Horas
-  		MOV	AH,0BH
-  		INT 21h
-  		cmp AL,0
+  		mov	ah,0BH
+  		int 21h
+  		cmp al,0
   		je	sem_tecla
 
   		goto_xy	POSx,POSy
 
-  		MOV	AH,08H
-  		INT	21H
-  		MOV	AH,0
-  		CMP	AL,0
-  		JNE	SAI_TECLA
-  		MOV	AH, 08H
-  		INT	21H
-  		MOV	AH,1
+  		mov	ah,08H
+  		int	21H
+  		mov	ah,0
+  		cmp	al,0
+  		  jne	SAI_TECLA
+  		mov	ah, 08H
+  		int	21H
+  		mov	ah,1
 
   sai_tecla:
     ret
@@ -846,8 +853,6 @@ fim:
 fnamenToFich endp  ; ----------->passa o nr de elementos do array com os labirintos para um ficheiro<---------------------
 
 
-
-
 fnameToFich proc   ; ----------->passa o array com os labirintos para um ficheiro<---------------------
 	mov	ah, 3ch			; abrir ficheiro para escrita
 	mov	cx, 00H			; tipo de ficheiro
@@ -891,42 +896,42 @@ fnameToFich endp	; ----------->passa o array com os labirintos para um ficheiro<
 fichTofname proc ; ----------->passa o array com os labirintos do ficheiro para o array<---------------------
 ;abre ficheiro
 
-        mov     ah,3dh			; vamos abrir ficheiro para leitura
-        mov     al,0			; tipo de ficheiro
-        lea     dx, mazenamesfich		; nome do ficheiro
-        int     21h			; abre para leitura
-        jc      erro_abrir		; pode aconter erro a abrir o ficheiro
-        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
-        jmp     ler		; depois de abero vamos ler o ficheiro
+  mov     ah,3dh			; vamos abrir ficheiro para leitura
+  mov     al,0			; tipo de ficheiro
+  lea     dx, mazenamesfich		; nome do ficheiro
+  int     21h			; abre para leitura
+  jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+  mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+  jmp     ler		; depois de abero vamos ler o ficheiro
 
 erro_abrir:
-        mov     ah,09h
-        lea     dx,Erro_Open
-        int     21h
-        jmp     sai
+  mov     ah,09h
+  lea     dx,Erro_Open
+  int     21h
+  jmp     sai
 
 ler:
-        mov     ah,3fh			; indica que vai ser lido um ficheiro
-        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
-        mov     cx, 390			; numero de bytes a ler
-        lea     dx, fname		; vai ler para o local de memoria apontado por dx (car_fich)
-        int     21h				; faz efectivamente a leitura
-		jc	    erro_ler		; se carry é porque aconteceu um erro
-        mov     ah,3eh  ; vamos fechar o ficheiro
-        mov     bx,HandleFich
-        int     21h
-        jnc     sai
-		mov     ah,09h			; o ficheiro pode não fechar correctamente
-        lea     dx,Erro_Close
-        Int     21h
+  mov     ah,3fh			; indica que vai ser lido um ficheiro
+  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+  mov     cx, 390			; numero de bytes a ler
+  lea     dx, fname		; vai ler para o local de memoria apontado por dx (car_fich)
+  int     21h				; faz efectivamente a leitura
+jc	    erro_ler		; se carry é porque aconteceu um erro
+  mov     ah,3eh  ; vamos fechar o ficheiro
+  mov     bx,HandleFich
+  int     21h
+  jnc     sai
+mov     ah,09h			; o ficheiro pode não fechar correctamente
+  lea     dx,Erro_Close
+  Int     21h
 
-		erro_ler:
-        mov     ah,09h
-        lea     dx,Erro_Ler_Msg
-        int     21h
+erro_ler:
+  mov     ah,09h
+  lea     dx,Erro_Ler_Msg
+  int     21h
 
 sai:
-        ret
+  ret
 fichTofname endp ; ----------->passa o array com os labirintos do ficheiro para o array<---------------------
 
 
@@ -934,42 +939,42 @@ fichTofname endp ; ----------->passa o array com os labirintos do ficheiro para 
 fichTofnamen proc ; ----------->passa o nr de elementos do array com os nomes dos mazes para o fnamen<---------------------
 ;abre ficheiro
 
-        mov     ah,3dh			; vamos abrir ficheiro para leitura
-        mov     al,0			; tipo de ficheiro
-        lea     dx, fnamenfich		; nome do ficheiro
-        int     21h			; abre para leitura
-        jc      erro_abrir		; pode aconter erro a abrir o ficheiro
-        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
-        jmp     ler		; depois de abero vamos ler o ficheiro
+  mov     ah,3dh			; vamos abrir ficheiro para leitura
+  mov     al,0			; tipo de ficheiro
+  lea     dx, fnamenfich		; nome do ficheiro
+  int     21h			; abre para leitura
+    jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+  mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+  jmp     ler		; depois de abero vamos ler o ficheiro
 
 erro_abrir:
-        mov     ah,09h
-        lea     dx,Erro_Open
-        int     21h
-        jmp     sai
+  mov     ah,09h
+  lea     dx,Erro_Open
+  int     21h
+  jmp     sai
 
 ler:
-        mov     ah,3fh			; indica que vai ser lido um ficheiro
-        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
-        mov     cx, 1			; numero de bytes a ler
-        lea     dx, fnamen		; vai ler para o local de memoria apontado por dx (car_fich)
-        int     21h				; faz efectivamente a leitura
-			jc	    erro_ler		; se carry é porque aconteceu um erro
-        mov     ah,3eh  ; vamos fechar o ficheiro
-        mov     bx,HandleFich
-        int     21h
-			jnc     sai
-		mov     ah,09h			; o ficheiro pode não fechar correctamente
-        lea     dx,Erro_Close
-        Int     21h
+  mov     ah,3fh			; indica que vai ser lido um ficheiro
+  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+  mov     cx, 1			; numero de bytes a ler
+  lea     dx, fnamen		; vai ler para o local de memoria apontado por dx (car_fich)
+  int     21h				; faz efectivamente a leitura
+    jc	    erro_ler		; se carry é porque aconteceu um erro
+  mov     ah,3eh  ; vamos fechar o ficheiro
+  mov     bx,HandleFich
+  int     21h
+    jnc     sai
+  mov     ah,09h			; o ficheiro pode não fechar correctamente
+  lea     dx,Erro_Close
+  int     21h
 
-		erro_ler:
-        mov     ah,09h
-        lea     dx,Erro_Ler_Msg
-        int     21h
+erro_ler:
+  mov     ah,09h
+  lea     dx,Erro_Ler_Msg
+  int     21h
 
 sai:
-        ret
+  ret
 
 fichTofnamen endp ; ----------->passa o nr de elementos do array com os nomes dos mazes para o fnamen<---------------------
 
@@ -979,60 +984,58 @@ fichTofnamen endp ; ----------->passa o nr de elementos do array com os nomes do
 fichTofnameptr proc ; ----------->passa o ptr para o ultimo elemento do array com os nomes dos mazes para o fnamen<---------------------
 ;abre ficheiro
 
-        mov     ah,3dh			; vamos abrir ficheiro para leitura
-        mov     al,0			; tipo de ficheiro
-        lea     dx, fnameptrfich		; nome do ficheiro
-        int     21h			; abre para leitura
-        jc      erro_abrir		; pode aconter erro a abrir o ficheiro
-        mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
-        jmp     ler		; depois de abero vamos ler o ficheiro
+  mov     ah,3dh			; vamos abrir ficheiro para leitura
+  mov     al,0			; tipo de ficheiro
+  lea     dx, fnameptrfich		; nome do ficheiro
+  int     21h			; abre para leitura
+  jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+  mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+  jmp     ler		; depois de abero vamos ler o ficheiro
 
 erro_abrir:
-        mov     ah,09h
-        lea     dx,Erro_Open
-        int     21h
-        jmp     sai
+  mov     ah,09h
+  lea     dx,Erro_Open
+  int     21h
+  jmp     sai
 
 ler:
-        mov     ah,3fh			; indica que vai ser lido um ficheiro
-        mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
-        mov     cx, 2			; numero de bytes a ler
-        lea     dx, fnameptr		; vai ler para o local de memoria apontado por dx (car_fich)
-        int     21h				; faz efectivamente a leitura
-			jc	    erro_ler		; se carry é porque aconteceu um erro
-        mov     ah,3eh  ; vamos fechar o ficheiro
-        mov     bx,HandleFich
-        int     21h
-			jnc     sai
-		mov     ah,09h			; o ficheiro pode não fechar correctamente
-        lea     dx,Erro_Close
-        Int     21h
+  mov     ah,3fh			; indica que vai ser lido um ficheiro
+  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+  mov     cx, 2			; numero de bytes a ler
+  lea     dx, fnameptr		; vai ler para o local de memoria apontado por dx (car_fich)
+  int     21h				; faz efectivamente a leitura
+    jc	    erro_ler		; se carry é porque aconteceu um erro
+  mov     ah,3eh  ; vamos fechar o ficheiro
+  mov     bx,HandleFich
+  int     21h
+    jnc     sai
+  mov     ah,09h			; o ficheiro pode não fechar correctamente
+  lea     dx,Erro_Close
+  int     21h
 
-		erro_ler:
-        mov     ah,09h
-        lea     dx,Erro_Ler_Msg
-        int     21h
+erro_ler:
+  mov     ah,09h
+  lea     dx,Erro_Ler_Msg
+  int     21h
 
 sai:
-        ret
+  ret
 
 fichTofnameptr endp ; ----------->passa o ptr para o ultimo elemento do array com os nomes dos mazes para o fnamen<---------------------
 
-
-
 MENUDESENHAR PROC  ;##########################----CRIACAO DE LABIRINTO---####################################
 
-    call pedeNomeF
-		mov		ax,0B800h
-		mov		es,ax
-		call		apaga_ecran
-		mov		Car, 32		;ESPA�O
-		mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-		mov		dl, car  ; espaco
-		int		21H
-		mov posx, 3
-		mov posy, 3
-		goto_xy posx, posy
+  call pedeNomeF
+  mov		ax,0B800h
+  mov		es,ax
+  call		apaga_ecran
+  mov		Car, 32		;ESPA�O
+  mov		ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
+  mov		dl, car  ; espaco
+  int		21H
+  mov posx, 3
+  mov posy, 3
+  goto_xy posx, posy
 
 CICLO:  ;**************************************
 	cmp posy, 21
@@ -1137,8 +1140,6 @@ DIREITA:
 
 MENUDESENHAR ENDP ;##########################----CRIACAO DE LABIRINTO---####################################
 
-
-
 menuEditMaze proc ;##########################----Editar LABIRINTO---####################################
 	mov		ax,0B800h
 	mov		es,ax
@@ -1150,262 +1151,265 @@ menuEditMaze proc ;##########################----Editar LABIRINTO---############
 	mov ax, fnameptr
 	mov lastzero, ax
 	dec lastzero
-	titulo:
-		cmp string5[si], 0
-			je checkelements
-		mov ah, 02h
-		mov dl, string5[si]
-		int 21h
-		inc si
-		jmp titulo
 
-	checkelements:
-		cmp fnamen, 0
-			jne mazesinic
-		mov posy, 2
-		mov posx, 20
-		goto_xy	POSx,POSy
-		jmp lerop
+titulo:
+cmp string5[si], 0
+	je checkelements
+mov ah, 02h
+mov dl, string5[si]
+int 21h
+inc si
+jmp titulo
 
-	mazesinic:
-		mov posy, 3
-		mov posx, 20
-		goto_xy	POSx,POSy
-		mov ah, 02h
-		mov dl, 91 ;[
-		int 21h
-		mov ah, 02h
-		mov dl, 32 ; espaco
-		int 21h
-		mov ah, 02h
-		mov dl, 93 ;]
-		int 21h
-		xor si, si ;si=0
-	mazes:
+checkelements:
+cmp fnamen, 0
+	jne mazesinic
+mov posy, 2
+mov posx, 20
+goto_xy	POSx,POSy
+jmp lerop
 
-		cmp fname[si], 0
-			jne notnline
-		cmp lastzero, si
-			je lerOp
-		inc posy
-		goto_xy	POSx,POSy
-		inc si
-		mov ah, 02h
-		mov dl, 91 ;[
-		int 21h
-		mov ah, 02h
-		mov dl, 32 ; espaco
-		int 21h
-		mov ah, 02h
-		mov dl, 93 ;]
-		int 21h
-		jmp mazes
-		notnline:
-			mov ah, 02h
-			mov dl, fname[si]
-			int 21h
-			inc si
-			jmp mazes
+mazesinic:
+mov posy, 3
+mov posx, 20
+goto_xy	POSx,POSy
+mov ah, 02h
+mov dl, 91 ;[
+int 21h
+mov ah, 02h
+mov dl, 32 ; espaco
+int 21h
+mov ah, 02h
+mov dl, 93 ;]
+int 21h
+xor si, si ;si=0
+mazes:
 
-	lerOp:
-		inc posy
-		goto_xy	POSx,POSy
-		mov ah, 02h
-		mov dl, 91 ;[
-		int 21h
-		mov ah, 02h
-		mov dl, 32 ; espaco
-		int 21h
-		mov ah, 02h
-		mov dl, 93 ;]
-		int 21h
-		mov ah, 02h
-		mov dl, 66 ; b
-		int 21h
-		mov ah, 02h
-		mov dl, 65 ; a
-		int 21h
-		mov ah, 02h
-		mov dl, 67 ; c
-		int 21h
-		mov ah, 02h
-		mov dl, 75 ; k
-		int 21h
-		mov posy, 3
-		mov posx, 21  ;meter o x dentro do []
-		goto_xy	POSx,POSy
+cmp fname[si], 0
+	jne notnline
+cmp lastzero, si
+	je lerOp
+inc posy
+goto_xy	POSx,POSy
+inc si
+mov ah, 02h
+mov dl, 91 ;[
+int 21h
+mov ah, 02h
+mov dl, 32 ; espaco
+int 21h
+mov ah, 02h
+mov dl, 93 ;]
+int 21h
+jmp mazes
+notnline:
+	mov ah, 02h
+	mov dl, fname[si]
+	int 21h
+	inc si
+	jmp mazes
 
-		CICLO:
-			mov al, fnamen
-			add al, 4  ;
-			cmp posy, al
-				jne snake
-			mov posy, 3 ;posicao inicial
+lerOp:
+  inc posy
+  goto_xy	POSx,POSy
+  mov ah, 02h
+  mov dl, 91 ;[
+  int 21h
+  mov ah, 02h
+  mov dl, 32 ; espaco
+  int 21h
+  mov ah, 02h
+  mov dl, 93 ;]
+  int 21h
+  mov ah, 02h
+  mov dl, 66 ; b
+  int 21h
+  mov ah, 02h
+  mov dl, 65 ; a
+  int 21h
+  mov ah, 02h
+  mov dl, 67 ; c
+  int 21h
+  mov ah, 02h
+  mov dl, 75 ; k
+  int 21h
+  mov posy, 3
+  mov posx, 21  ;meter o x dentro do []
+  goto_xy	POSx,POSy
 
-			snake:					;manter o 'x' dentro dos limites
-				cmp posy, 2
-					jne fimsnake
-				dec al
-				mov posy, al
+CICLO:
+	mov al, fnamen
+	add al, 4  ;
+	cmp posy, al
+		jne snake
+	mov posy, 3 ;posicao inicial
 
-			fimsnake:
-			;**************************************
+snake:					;manter o 'x' dentro dos limites
+  cmp posy, 2
+		jne fimsnake
+	dec al
+	mov posy, al
 
-				goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+fimsnake:
+;**************************************
 
-				mov		ah, 02h
-				mov		dl, Car	; Repoe Caracter guardado
-				int		21H
+  goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+  mov		ah, 02h
+	mov		dl, Car	; Repoe Caracter guardado
+	int		21H
 
-				goto_xy	POSx,POSy	; Vai para nova possi��o
-				mov 	ah, 08h
-				mov		bh,0		; numero da p�gina
-				int		10h
-				mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
-				mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+	goto_xy	POSx,POSy	; Vai para nova possi��o
+	mov 	ah, 08h
+	mov		bh,0		; numero da p�gina
+	int		10h
+	mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
+	mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
-				goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
-				mov		ah, 02h	; IMPRIME caracter da posi��o no canto
-				mov		dl, Car
-				int		21H
+	goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
+	mov		ah, 02h	; IMPRIME caracter da posi��o no canto
+	mov		dl, Car
+	int		21H
 
-				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+	goto_xy	POSx,POSy	; Vai para posi��o do cursor
 
-			IMPRIME:
-				mov		ah, 02h
-				mov		dl, 120	; Coloca AVATAR x -> 120
-				int		21H
-				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+IMPRIME:
+	mov		ah, 02h
+	mov		dl, 120	; Coloca AVATAR x -> 120
+	int		21H
+	goto_xy	POSx,POSy	; Vai para posi��o do cursor
 
-				mov		al, POSx	; Guarda a posi��o do cursor
-				mov		POSxa, al
-				mov		al, POSy	; Guarda a posi��o do cursor
-				mov 	POSya, al
+	mov		al, POSx	; Guarda a posi��o do cursor
+	mov		POSxa, al
+	mov		al, POSy	; Guarda a posi��o do cursor
+	mov 	POSya, al
 
-			LER_SETA:
-				call 	le_tecla
-				cmp		ah, 1
-					je		ESTEND
-				cmp al, 13		 ;enter--------------------------------------
-					jne estend
-				mov al, fnamen
-				add al, 3	; +3 onde começa
-				cmp posy, al   ; se o 'x' estiver no back
-					jne qualmaze
-				ret
-				qualmaze:
-						mov al, posy
-						mov fnameditop, al
-						sub fnameditop, 2  ;-2 porque o 0 é o default
-						jmp guessMaze
-
-			ESTEND:
-				cmp 	al,48h
-				jne		BAIXO
-				dec		POSy		;cima
-				jmp		CICLO
-
-			BAIXO:
-				cmp		al,50h
-				jne		ciclo
-				inc 	POSy		;Baixo
-				jmp		CICLO
-
-
-	guessMaze:
-		;descobrir fnamedit -------------------
-		mov cx, 13
-		xor si, si
-		xor di, di
-	inicializa:  ;colocar fnamedit toda a zeros
-		mov fnamedit[si], 0
-		inc si
-			loop inicializa
-
-		mov p, 0 ;p e um ponteiro
-		xor si, si
-	pset:  ;vamos descobrir onde esta o nome do ficheiro correspondente á opçao
-		mov al, fnameditop
-		dec al ;pq 0 é o mazedefault
-		cmp p, al ;p é o n de zeros
-			je strcpy
-		srchzero:
-			cmp fname[si], 0
-				je incp
-			inc si
-			jmp srchzero
-		incp:
-			inc p
-			inc si
-			jmp pset
-	strcpy:
-		cmp fname[si], 0
-			je openmaze
-		mov al, fname[si]
-		mov fnamedit[di], al
-		inc si
-		inc di
-		jmp strcpy
-
-
-	openmaze:
-		mov mazedim, 0
-		goto_xy 0,0
-		; imprime ficheiro-----------
-				;abre ficheiro
-
-		  mov     ah,3dh			; vamos abrir ficheiro para leitura
-		  mov     al,0			; tipo de ficheiro
-		  lea     dx, fnamedit			; nome do ficheiro
-		  int     21h			; abre para leitura
-		  jc      erro_abrir		; pode aconter erro a abrir o ficheiro
-		  mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
-		  jmp     ler_ciclo		; depois de abero vamos ler o ficheiro
-
-		erro_abrir:
-		  mov     ah,09h
-		  lea     dx,Erro_Open
-		  int     21h
-		  ret
-
-
-		ler_ciclo:
-		  mov     ah,3fh			; indica que vai ser lido um ficheiro
-		  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
-		  mov     cx,1			; numero de bytes a ler
-		  lea     dx,car_fich		; vai ler para o local de memoria apontado por dx (car_fich)
-		  int     21h				; faz efectivamente a leitura
-		  jc	    erro_ler		; se carry é porque aconteceu um erro
-		  cmp	    ax,0			;EOF?	verifica se já estamos no fim do ficheiro
-			je	    fecha_ficheiro	; se EOF fecha o ficheiro
-
-		  mov     ah,02h			; coloca o caracter no ecran
-		  mov	    dl,car_fich		; este é o caracter a enviar para o ecran
-		  int	    21h				; imprime no ecran
-		  inc mazedim
-		  cmp mazedim, 3520 ; 22*80*2   22linhas *80colunas *2bytes
-			jae fecha_ficheiro
-		  jmp	    ler_ciclo		; continua a ler o ficheiro
-
-		erro_ler:
-		  mov     ah,09h
-		  lea     dx,Erro_Ler_Msg
-		  int     21h
-
-		fecha_ficheiro:					; vamos fechar o ficheiro
-		  mov     ah,3eh
-		  mov     bx,HandleFich
-		  int     21h
-
-		 ;------------------------------------------------------------------------------------
-
-	call edit_ficheiro
+LER_SETA:
+	call 	le_tecla
+	cmp		ah, 1
+		je		ESTEND
+	cmp al, 13		 ;enter--------------------------------------
+		jne estend
+	mov al, fnamen
+	add al, 3	; +3 onde começa
+	cmp posy, al   ; se o 'x' estiver no back
+		jne qualmaze
 	ret
 
+qualmaze:
+	mov al, posy
+	mov fnameditop, al
+	sub fnameditop, 2  ;-2 porque o 0 é o default
+	jmp guessMaze
+
+ESTEND:
+	cmp 	al,48h
+	jne		BAIXO
+	dec		POSy		;cima
+	jmp		CICLO
+
+BAIXO:
+	cmp		al,50h
+	jne		ciclo
+	inc 	POSy		;Baixo
+	jmp		CICLO
+
+
+guessMaze:
+  ;descobrir fnamedit -------------------
+  mov cx, 13
+  xor si, si
+  xor di, di
+
+inicializa:  ;colocar fnamedit toda a zeros
+  mov fnamedit[si], 0
+  inc si
+  	loop inicializa
+
+  mov p, 0 ;p e um ponteiro
+  xor si, si
+
+pset:  ;vamos descobrir onde esta o nome do ficheiro correspondente á opçao
+  mov al, fnameditop
+  dec al ;pq 0 é o mazedefault
+  cmp p, al ;p é o n de zeros
+  	je strcpy
+
+srchzero:
+	cmp fname[si], 0
+		je incp
+	inc si
+	 jmp srchzero
+
+incp:
+	inc p
+	inc si
+	jmp pset
+
+strcpy:
+  cmp fname[si], 0
+  	je openmaze
+  mov al, fname[si]
+  mov fnamedit[di], al
+  inc si
+  inc di
+  jmp strcpy
+
+
+openmaze:
+  mov mazedim, 0
+  goto_xy 0,0
+  ; imprime ficheiro-----------
+  		;abre ficheiro
+
+  mov     ah,3dh			; vamos abrir ficheiro para leitura
+  mov     al,0			; tipo de ficheiro
+  lea     dx, fnamedit			; nome do ficheiro
+  int     21h			; abre para leitura
+  jc      erro_abrir		; pode aconter erro a abrir o ficheiro
+  mov     HandleFich,ax		; ax devolve o Handle para o ficheiro
+  jmp     ler_ciclo		; depois de abero vamos ler o ficheiro
+
+erro_abrir:
+  mov     ah,09h
+  lea     dx,Erro_Open
+  int     21h
+  ret
+
+
+ler_ciclo:
+  mov     ah,3fh			; indica que vai ser lido um ficheiro
+  mov     bx,HandleFich		; bx deve conter o Handle do ficheiro previamente aberto
+  mov     cx,1			; numero de bytes a ler
+  lea     dx,car_fich		; vai ler para o local de memoria apontado por dx (car_fich)
+  int     21h				; faz efectivamente a leitura
+  jc	    erro_ler		; se carry é porque aconteceu um erro
+  cmp	    ax,0			;EOF?	verifica se já estamos no fim do ficheiro
+	je	    fecha_ficheiro	; se EOF fecha o ficheiro
+
+  mov     ah,02h			; coloca o caracter no ecran
+  mov	    dl,car_fich		; este é o caracter a enviar para o ecran
+  int	    21h				; imprime no ecran
+  inc mazedim
+  cmp mazedim, 3520 ; 22*80*2   22linhas *80colunas *2bytes
+	jae fecha_ficheiro
+  jmp	    ler_ciclo		; continua a ler o ficheiro
+
+erro_ler:
+  mov     ah,09h
+  lea     dx,Erro_Ler_Msg
+  int     21h
+
+fecha_ficheiro:					; vamos fechar o ficheiro
+  mov     ah,3eh
+  mov     bx,HandleFich
+  int     21h
+
+ ;------------------------------------------------------------------------------------
+
+call edit_ficheiro
+ret
+
 menuEditMaze endp ;##########################----Editar LABIRINTO---####################################
-
-
-
 
 menuLoadUmaze proc   ;##########################----carregar labirinto---####################################
 
@@ -1417,175 +1421,174 @@ menuLoadUmaze proc   ;##########################----carregar labirinto---#######
 	mov ax, fnameptr
 	mov lastzero, ax
 	dec lastzero
-	titulo:
-		cmp string2[si], 0
-			je checkelements
-		mov ah, 02h
-		mov dl, string2[si]
-		int 21h
-		inc si
-		jmp titulo
 
-	checkelements:
-		cmp fnamen, 0
-			jne mazesinic
-		mov posy, 2
-		mov posx, 20
-		goto_xy	POSx,POSy
-		jmp lerop
+titulo:
+	cmp string2[si], 0
+		je checkelements
+	mov ah, 02h
+	mov dl, string2[si]
+	int 21h
+	inc si
+  jmp titulo
 
-	mazesinic:
-		mov posy, 3
-		mov posx, 20
-		goto_xy	POSx,POSy
-		mov ah, 02h
-		mov dl, 91 ;[
-		int 21h
-		mov ah, 02h
-		mov dl, 32 ; espaco
-		int 21h
-		mov ah, 02h
-		mov dl, 93 ;]
-		int 21h
-		xor si, si ;si=0
-	mazes:
+checkelements:
+	cmp fnamen, 0
+		jne mazesinic
+	mov posy, 2
+	mov posx, 20
+	goto_xy	POSx,POSy
+	jmp lerop
 
-		cmp fname[si], 0
-			jne notnline
-		cmp lastzero, si
-			je lerOp
-		inc posy
-		goto_xy	POSx,POSy
-		inc si
-		mov ah, 02h
-		mov dl, 91 ;[
-		int 21h
-		mov ah, 02h
-		mov dl, 32 ; espaco
-		int 21h
-		mov ah, 02h
-		mov dl, 93 ;]
-		int 21h
-		jmp mazes
-		notnline:
-			mov ah, 02h
-			mov dl, fname[si]
-			int 21h
-			inc si
-			jmp mazes
+mazesinic:
+	mov posy, 3
+	mov posx, 20
+	goto_xy	POSx,POSy
+	mov ah, 02h
+	mov dl, 91 ;[
+	int 21h
+	mov ah, 02h
+	mov dl, 32 ; espaco
+	int 21h
+	mov ah, 02h
+	mov dl, 93 ;]
+	int 21h
+	xor si, si ;si=0
 
-	lerOp:
-		inc posy
-		goto_xy	POSx,POSy
-		mov ah, 02h
-		mov dl, 91 ;[
-		int 21h
-		mov ah, 02h
-		mov dl, 32 ; espaco
-		int 21h
-		mov ah, 02h
-		mov dl, 93 ;]
-		int 21h
-		mov ah, 02h
-		mov dl, 66 ; b
-		int 21h
-		mov ah, 02h
-		mov dl, 65 ; a
-		int 21h
-		mov ah, 02h
-		mov dl, 67 ; c
-		int 21h
-		mov ah, 02h
-		mov dl, 75 ; k
-		int 21h
-		mov posy, 3
-		mov posx, 21  ;meter o x dentro do []
-		goto_xy	POSx,POSy
+mazes:
+	cmp fname[si], 0
+		jne notnline
+	cmp lastzero, si
+		je lerOp
+	inc posy
+	goto_xy	POSx,POSy
+	inc si
+	mov ah, 02h
+	mov dl, 91 ;[
+	int 21h
+	mov ah, 02h
+	mov dl, 32 ; espaco
+	int 21h
+	mov ah, 02h
+	mov dl, 93 ;]
+	int 21h
+	jmp mazes
 
-		CICLO:
-			mov al, fnamen
-			add al, 4  ;
-			cmp posy, al
-				jne snake
-			mov posy, 3 ;posicao inicial
+notnline:
+	mov ah, 02h
+	mov dl, fname[si]
+	int 21h
+	inc si
+	jmp mazes
 
-			snake:					;manter o 'x' dentro dos limites
-				cmp posy, 2
-					jne fimsnake
-				dec al
-				mov posy, al
+lerOp:
+	inc posy
+	goto_xy	POSx,POSy
+	mov ah, 02h
+	mov dl, 91 ;[
+	int 21h
+	mov ah, 02h
+	mov dl, 32 ; espaco
+	int 21h
+	mov ah, 02h
+	mov dl, 93 ;]
+	int 21h
+	mov ah, 02h
+	mov dl, 66 ; b
+	int 21h
+	mov ah, 02h
+	mov dl, 65 ; a
+	int 21h
+	mov ah, 02h
+	mov dl, 67 ; c
+	int 21h
+	mov ah, 02h
+	mov dl, 75 ; k
+	int 21h
+	mov posy, 3
+	mov posx, 21  ;meter o x dentro do []
+	goto_xy	POSx,POSy
 
-			fimsnake:
-			;**************************************
+CICLO:
+	mov al, fnamen
+	add al, 4  ;
+	cmp posy, al
+		jne snake
+	mov posy, 3 ;posicao inicial
 
-				goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
+snake:					;manter o 'x' dentro dos limites
+	cmp posy, 2
+		jne fimsnake
+	dec al
+	mov posy, al
 
-				mov		ah, 02h
-				mov		dl, Car	; Repoe Caracter guardado
-				int		21H
+fimsnake:
+;**************************************
 
-				goto_xy	POSx,POSy	; Vai para nova possi��o
-				mov 	ah, 08h
-				mov		bh,0		; numero da p�gina
-				int		10h
-				mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
-				mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
+	goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
 
-				goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
-				mov		ah, 02h	; IMPRIME caracter da posi��o no canto
-				mov		dl, Car
-				int		21H
+	mov		ah, 02h
+	mov		dl, Car	; Repoe Caracter guardado
+	int		21H
 
-				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+	goto_xy	POSx,POSy	; Vai para nova possi��o
+	mov 	ah, 08h
+	mov		bh,0		; numero da p�gina
+	int		10h
+	mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
+	mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
-			IMPRIME:
-				mov		ah, 02h
-				mov		dl, 120	; Coloca AVATAR x -> 120
-				int		21H
-				goto_xy	POSx,POSy	; Vai para posi��o do cursor
+	goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
+	mov		ah, 02h	; IMPRIME caracter da posi��o no canto
+	mov		dl, Car
+	int		21H
 
-				mov		al, POSx	; Guarda a posi��o do cursor
-				mov		POSxa, al
-				mov		al, POSy	; Guarda a posi��o do cursor
-				mov 	POSya, al
+	goto_xy	POSx,POSy	; Vai para posi��o do cursor
 
-			LER_SETA:
-				call 	le_tecla
-				cmp		ah, 1
-					je		ESTEND
-				cmp al, 13		 ;enter--------------------------------------
-					jne estend
-				mov al, fnamen
-				add al, 3	; +3 onde começa
-				cmp posy, al   ; se o 'x' estiver no back
-					jne qualmaze
-				ret
-				qualmaze:
-						mov al, posy
-						mov fnameop, al
-						sub fnameop, 2  ;-2 porque o 0 é o default
-						ret
+IMPRIME:
+	mov		ah, 02h
+	mov		dl, 120	; Coloca AVATAR x -> 120
+	int		21H
+	goto_xy	POSx,POSy	; Vai para posi��o do cursor
 
-			ESTEND:
-				cmp 	al,48h
-				jne		BAIXO
-				dec		POSy		;cima
-				jmp		CICLO
+	mov		al, POSx	; Guarda a posi��o do cursor
+	mov		POSxa, al
+	mov		al, POSy	; Guarda a posi��o do cursor
+	mov 	POSya, al
 
-			BAIXO:
-				cmp		al,50h
-				jne		ciclo
-				inc 	POSy		;Baixo
-				jmp		CICLO
+LER_SETA:
+	call 	le_tecla
+	cmp		ah, 1
+		je		ESTEND
+	cmp al, 13		 ;enter--------------------------------------
+		jne estend
+	mov al, fnamen
+	add al, 3	; +3 onde começa
+	cmp posy, al   ; se o 'x' estiver no back
+		jne qualmaze
+	ret
+	qualmaze:
+			mov al, posy
+			mov fnameop, al
+			sub fnameop, 2  ;-2 porque o 0 é o default
+			ret
 
+ESTEND:
+	cmp 	al,48h
+	jne		BAIXO
+	dec		POSy		;cima
+	jmp		CICLO
 
+BAIXO:
+	cmp		al,50h
+	jne		ciclo
+	inc 	POSy		;Baixo
+	jmp		CICLO
 
 menuLoadUmaze endp   ;##########################----carregar labirinto---####################################
 
-
-
 menuDeleteMaze proc   ;##########################----apagar labirintos---####################################
-	inicio:
+
+  inicio:
 	call apaga_ecran
 	mov posy, 2
 	mov posx, 8
@@ -1980,7 +1983,6 @@ fim:
 
 MENUCONFIG ENDP ;##########################----MENU DE CONFIGURACAO---####################################
 
-
 PLAY PROC ;##########################----INICIA O JOGO---####################################
 
   mov		ax,0B800h           ; Apaga
@@ -2073,8 +2075,8 @@ ler_ciclo:
   mov	    dl,car_fich		; este é o caracter a enviar para o ecran
   int	    21h				; imprime no ecran
   inc mazedim
-   cmp mazedim, 3520 ; 22*80*2   22linhas *80colunas *2bytes
-		jae fecha_ficheiro
+  cmp mazedim, 3520 ; 22*80*2   22linhas *80colunas *2bytes
+	 jae fecha_ficheiro
   jmp	    ler_ciclo		; continua a ler o ficheiro
 
 erro_ler:
@@ -2099,6 +2101,29 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
+;procuar o I no maze e substituir pelo avatar-----------------------------------------------
+	mov ax, 0B800h  ;memoria de video
+	mov es, ax
+
+  mov cx, 20*80 ;  20 altura * 80 largura
+  mov si, 80*2 ;come�a na linha 1
+
+procuraI:
+	mov bx, es:[si]
+  add si, 2
+  cmp bl, 73 ; I
+    loopne procuraI
+  sub si, 2
+  mov bl, 233 ;avatar
+  mov es:[si], bx
+
+  mov ax, si
+  mov bl, 160 ;imediat operand not allowed
+  div bl
+  mov mazey, al  ; o quociente � o y
+  mov mazex, ah  ; o resto � o x
+;---------------------------------------------------------------------------
+
   ; monta o cornometro
   goto_xy 68,1
   mostra strzero
@@ -2115,26 +2140,28 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   goto_xy 64,1
   mostra strzero
 
+  mov tempopartida, 0 ; Inicializa a variavel tempopartida para um novo jogo
+
 CICLO:
 ;***********************************************************
-		cmp mazey, 21
-			jne notdown
-		mov mazey, 1
+	cmp mazey, 21
+		jne notdown
+	mov mazey, 1
 
-	notdown:					;manter o y dentro dos limites
-		cmp mazey, 0
-			jne notup
-		mov mazey, 20
+notdown:					;manter o y dentro dos limites
+	cmp mazey, 0
+		jne notup
+	mov mazey, 20
 
-	notup:
-		cmp mazex, 0			;manter o x dentro dos limites
-			jne notleft
-		mov mazex, 40
-	notleft:
-		cmp mazex, 41
-			jne notright
-		mov mazex, 1
-	notright:
+notup:
+	cmp mazex, 0			;manter o x dentro dos limites
+		jne notleft
+	mov mazex, 40
+notleft:
+	cmp mazex, 41
+		jne notright
+	mov mazex, 1
+notright:
 	goto_xy	mazex,mazey
 ;*****************************************************
 
@@ -2155,8 +2182,6 @@ CICLO:
 	 jne parede  ; se não for espaço é parede
 	jmp imprime
 
-
-
 parede:
 
 	goto_xy POSxa,POSya ; vai para a posição anterior
@@ -2165,11 +2190,6 @@ parede:
 	mov MazeX,ch
 	mov ch,POSya
 	mov MazeY,ch
-
-  ;goto_xy	78,0		; Mostra o caractr que estava na posi��o do AVATAR
-  ;mov		ah, 02h	; IMPRIME caracter da posi��o no canto
-  ;mov		dl, Car
-  ;int		21H
 
 IMPRIME:
 
@@ -2188,7 +2208,7 @@ LER_SETA:
   cmp		ah, 1
     je		CIMA
   cmp 	al, 27	; ESCAPE
-    je		FIM
+    je		TEMPOTOTAL
   jmp		LER_SETA
 
 CIMA:
@@ -2215,6 +2235,20 @@ DIREITA:
   inc		MazeX		;Direita
   jmp		CICLO
 
+TEMPOTOTAL:
+  call apaga_ecran
+  goto_xy 35,11
+  mostra strTEMPOTOTAL ; String fixa TEMPOTOTAL
+  mov bl, tempopartida
+  add bl, 48
+  mov strtempopartida, bl
+  goto_xy 40,12
+  mostra strtempopartida
+  call 	LE_TECLA
+  cmp 	al, 27	; ESCAPE
+    ret
+  jmp		TEMPOTOTAL
+
 fim:
 	mov		ah,4CH
 	int		21H
@@ -2224,8 +2258,8 @@ PLAY ENDP ;##########################----INICIA O JOGO---#######################
 MENU PROC ;##########################----MENU PRINCIPAL---####################################
   inicio:
   	mov		ax,0B800h           ; Apaga
-  	mov		es,ax				;	o
-  	call		apaga_ecran		; Ecran
+  	mov		es,ax				        ;	o
+  	call		apaga_ecran		    ; Ecran
 
   	mov POSy,			18
   	mov POSx,			33
