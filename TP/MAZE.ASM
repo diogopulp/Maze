@@ -486,7 +486,7 @@ scanf:
 	goto_xy	POSx,POSy
 	mov quatroch, 1
 	xor si, si
-	
+
 	CICLO:
 		call	LE_TECLA
 	;	cmp	ah, 1
@@ -497,7 +497,7 @@ scanf:
 			jne espaco
 		mov coordenadas[si], 0
 		ret
-		
+
 	espaco:
 		cmp al, 32 ; espaco
 			jne backspace
@@ -506,7 +506,7 @@ scanf:
 		int	21H
 		mov quatroch, 1
 		jmp	CICLO
-		
+
 
 	backspace:
 		cmp		AL, 8  ;BACKSPACE
@@ -539,8 +539,8 @@ scanf:
 		mov coordenadas[si], 48  ;coloca na variavel
 		inc si
 		jmp	CICLO
-		
-	um:	
+
+	um:
 		cmp al, 49 ; 1
 			jne ciclo
 		mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
@@ -550,8 +550,8 @@ scanf:
 		mov coordenadas[si], 49  ;coloca na variavel
 		inc si
 		jmp	CICLO
-		
-	
+
+
 pedecoordenadas endp ;------>PEDE as coordenadas para o play2<------
 
 
@@ -757,101 +757,6 @@ close:
 	int	21h
 
 CRIA_FICHEIRO ENDP  ; ----------->cria um ficheiro<---------------------
-
-
-
-
-pedecoordenadas proc ;------>PEDE as coordenadas para o play2<------
-
-	mov posy, 22
-	mov posx, 1
-	goto_xy	POSx,POSy
-	xor si, si ;si=0
-
-puts:
-	cmp string6[si], 0
-		je scanf
-	mov ah, 02h
-	mov dl, string6[si]
-	int 21h
-	inc si
-	jmp puts
-
-scanf:
-	mov posy, 23
-	mov posx, 1
-	goto_xy	POSx,POSy
-	mov quatroch, 1
-	xor si, si
-	
-	CICLO:
-		call	LE_TECLA
-	;	cmp	ah, 1
-	;		je	ciclo
-		cmp quatroch, 5
-			jne backspace
-		cmp al, 13		; enter--------------------------------------
-			jne espaco
-		mov coordenadas[si], 0
-		ret
-		
-	espaco:
-		cmp al, 32 ; espaco
-			jne backspace
-		mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-		mov	dl, 32 ;espaco
-		int	21H
-		mov quatroch, 1
-		jmp	CICLO
-		
-
-	backspace:
-		cmp		AL, 8  ;BACKSPACE
-			jne limitesup
-		cmp quatroch, 2
-			jb ciclo   ; so continua se estiver dentro do lim inferior
-		mov		ah, 02h
-		mov		dl, 8 ;backspace pa andar pa traz
-		int		21H
-		mov		ah, 02h
-		mov		dl, 32 ;espaço pa limpar
-		int		21H
-		mov		ah, 02h
-		mov		dl, 8 ;backspace pa andar pa traz
-		int		21H
-		dec quatroch
-		dec si ;anda pa traz no nomefich
-		jmp ciclo
-
-	limitesup:
-		cmp quatroch, 4
-			ja ciclo    ; so continua se estiver dentro do lim superior
-
-		cmp al, 48 ; 0
-			jne um
-		mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-		mov	dl, 48 ;0
-		int	21H
-		inc quatroch
-		mov coordenadas[si], 48  ;coloca na variavel
-		inc si
-		jmp	CICLO
-		
-	um:	
-		cmp al, 49 ; 1
-			jne ciclo
-		mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
-		mov	dl, 49 ;1
-		int	21H
-		inc quatroch
-		mov coordenadas[si], 49  ;coloca na variavel
-		inc si
-		jmp	CICLO
-		
-	
-pedecoordenadas endp ;------>PEDE as coordenadas para o play2<------
-
-
 
 fnameptrToFich proc  ; ----------->passa o ptr para o ultimo elemento do array com os labirintos para um ficheiro<---------------------
 	mov	ah, 3ch			; abrir ficheiro para escrita
@@ -2315,13 +2220,31 @@ DIREITA:
 TEMPOTOTAL:
   ; Mostra no ecrã
   call apaga_ecran
-  goto_xy 35,11
+  goto_xy 32,11
   mostra strTEMPOTOTAL ; String fixa TEMPOTOTAL
-  mov bl, tempopartida
-  add bl, 48
-  mov strtempopartida, bl
-  goto_xy 40,12
-  mostra strtempopartida
+
+  ; monta o cornometro
+  goto_xy 37,12
+  mostra strzero
+
+  goto_xy 36,12
+  mostra strzero
+
+  goto_xy 35,12
+  mostra strdoispontos
+
+  goto_xy 34,12
+  mostra strzero
+
+  goto_xy 33,12
+  mostra strzero
+
+  ;mov bl, tempopartida
+  ;add bl, 48
+  ;mov strtempopartida, bl
+  ;goto_xy 40,12
+  ;mostra strtempopartida
+
   call 	LE_TECLA
   cmp 	al, 27	; ESCAPE
     ret
@@ -2469,6 +2392,8 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   		jne bonus
   	call menuconfig
   	jmp inicio
+
+
 	bonus:
 		cmp posy, 22 ; se o 'x' estiver no maze config
 			jne estend
@@ -2505,7 +2430,7 @@ menubonus proc ;##########################----MENU PRINCIPAL---#################
  mov		ax,0B800h           ; Apaga
   mov		es,ax				;	o
   call apaga_ecran ; ecra
-  
+
 
   ; ate aqui esta igual ao MENU
 
@@ -2613,35 +2538,35 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 
 	;procuar o I no maze e substituir pelo avatar-----------------------------------------------
 	mov ax, 0B800h  ;memoria de video
-	mov es, ax  
-	
+	mov es, ax
+
 	mov cx, 20*80 ;  20 altura * 80 largura
 	mov si, 80*2 ;começa na linha 1
-	
+
 	procuraI:
 		mov bx, es:[si]
 		add si, 2
 		cmp bl, 73 ; I
-			loopne procuraI 
+			loopne procuraI
 		sub si, 2
 		mov bl, 233 ;avatar
 		mov es:[si], bx
-		
+
 		xor ax, ax
 		mov ax, si
 		mov bl, 160 ;imediat operand not allowed
 		div bl
 		mov mazey, al  ; o quociente é o y
 		mov mazex, ah  ; o resto é o x
-		
-	;---------------------------------------------------------------------------	
+
+	;---------------------------------------------------------------------------
 		dec mazex
-	
+
 
   ;imput das coordenadas--------------------------------------------------------------------------------------------------------------------
 	call pedecoordenadas
-	
-  
+
+
 	xor si, si
 	verpassos:
 			mov di, si
@@ -2668,7 +2593,7 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 		quatro:
 			mov cx, 4  		;cx vai conter o nr de passos a dar
 			mov di, si       ;repor o di antes de ver a direcao
-		
+
 		verdirecao:
 			cmp coordenadas[di], 48 ;0
 				jne este
@@ -2678,8 +2603,8 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 			movernorte:
 				dec mazey
 				goto_xy	MazeX, MazeY
-				
-				getchar1:	
+
+				getchar1:
 					call 	le_tecla
 					cmp 	al, 27	 ; escape
 						je fim
@@ -2705,15 +2630,15 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 			movereste:
 				inc mazex
 				goto_xy	mazex,mazey
-				
-			
+
+
 			getchar3:
 						call 	le_tecla
 						cmp 	al, 27	 ; escape
 							je fim
 						cmp 	al, 13	 ; enter
 							jne		getchar3
-	
+
 			loop movereste
 			jmp incrementar
 		moveroeste:
@@ -2726,17 +2651,17 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 					cmp 	al, 13	 ; enter
 						jne		getchar4
 			loop moveroeste
-		
+
 	incrementar:
-		
-		
+
+
 		add si, 4
 		cmp coordenadas[si], 0
 			jne verpassos
-		
-			
-			
-			
+
+
+
+
 fim:
 	ret
 menubonus endp ;##########################----MENU PRINCIPAL---####################################
