@@ -19,6 +19,7 @@ dseg    segment para public 'data'
 coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
   mazedim dw 0 ;dimensao do labirinto, para imprimir
   FichDefaultMaze  db    'maze.txt',0
+  FichMazeUser db '',0
   fnameptrFich db 'mnamespf.txt',0 ;nome do ficheiro que contem o ponteiro para o ultimo elemento do array com os nomes dos labirintos
   fnamenFich db 'mnamesnf.txt',0 ;nome do ficheiro que contem o n de elementos do array com os nomes dos labirintos
   mazeNamesFich db 'mnamesf.txt',0 ;nome do ficheiro que contem os nomes dos labirintos
@@ -42,9 +43,6 @@ coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
 
   MazeX            db    1
   MazeY            db    1
-
-  FimX  db 1
-  FimY  db 1
 
   ;------------------VARIAVEIS DO MAZE1----------------------
   chIn db 65
@@ -119,9 +117,6 @@ coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
   strzero db "0$"
   strdoispontos db ":$"
 
-  cenas1 db "     $"
-  cenas2 db "     $"
-
 dseg    ends
 
 cseg    segment para public 'code'
@@ -146,7 +141,7 @@ ENDM
 
 GRAVATEMPO MACRO NOME, TEMP
 
-; QUERIA POR AQUI O GAJO A GRAVAR O NOME E O TEMPO
+; por implementar
 
 ENDM
 ;MACROS
@@ -2564,31 +2559,47 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
+  ;procura o I e o F no maze e substitui por espaço-----------------------------------------------
+  	mov ax, 0B800h  ;memoria de video
+  	mov es, ax
 
-	;procuar o I no maze e substituir pelo avatar-----------------------------------------------
-	mov ax, 0B800h  ;memoria de video
-	mov es, ax
+    mov cx, 20*80   ; 20 altura * 80 largura
+    mov si, 80*2    ; come�a na linha 1
 
-	mov cx, 20*80 ;  20 altura * 80 largura
-	mov si, 80*2 ;começa na linha 1
+  procuraF:
+  	mov bx, es:[si] ;memoria de video
+    add si, 2
 
-	procuraI:
-		mov bx, es:[si]
-		add si, 2
-		cmp bl, 73 ; I
-			loopne procuraI
-		sub si, 2
-		mov bl, 233 ;avatar
-		mov es:[si], bx
+    cmp bl, 70 ; F
+      loopne procuraF
+    sub si, 2
+    mov bl, 20h ;substitui por espaço em branco
+    mov es:[si], bx
 
-		xor ax, ax
-		mov ax, si
-		mov bl, 160 ;imediat operand not allowed
-		div bl
-		mov mazey, al  ; o quociente é o y
-		mov mazex, ah  ; o resto é o x
+    mov ax, si
+    mov bl, 160 ;imediat operand not allowed
+    div bl
+    mov mazey, al  ; o quociente � o y
+    mov mazex, ah  ; o resto � o x
 
-	;---------------------------------------------------------------------------
+  procuraI:
+  	mov bx, es:[si]
+    add si, 2
+    cmp bl, 73 ; I
+      loopne procuraI
+    sub si, 2
+    mov bl, 20h ;substitui por espaço em branco
+    mov es:[si], bx
+
+    mov ax, si
+    mov bl, 160 ;imediat operand not allowed
+    div bl
+    mov mazey, al  ; o quociente � o y
+    mov mazex, ah  ; o resto � o x
+
+
+  ;---------------------------------------------------------------------------
+
 		dec mazex
 
 
