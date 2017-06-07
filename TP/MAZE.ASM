@@ -682,7 +682,7 @@ scanf:
 	goto_xy	POSx,POSy
 	mov quatroch, 1
 	xor si, si
-	
+
 	CICLO:
 		call	LE_TECLA
 	;	cmp	ah, 1
@@ -693,7 +693,7 @@ scanf:
 			jne espaco
 		mov coordenadas[si], 0
 		ret
-		
+
 	espaco:
 		cmp al, 32 ; espaco
 			jne backspace
@@ -702,7 +702,7 @@ scanf:
 		int	21H
 		mov quatroch, 1
 		jmp	CICLO
-		
+
 
 	backspace:
 		cmp		AL, 8  ;BACKSPACE
@@ -735,8 +735,8 @@ scanf:
 		mov coordenadas[si], 48  ;coloca na variavel
 		inc si
 		jmp	CICLO
-		
-	um:	
+
+	um:
 		cmp al, 49 ; 1
 			jne ciclo
 		mov	ah, 02h      ;WRITE CHARACTER TO STANDARD OUTPUT
@@ -746,8 +746,8 @@ scanf:
 		mov coordenadas[si], 49  ;coloca na variavel
 		inc si
 		jmp	CICLO
-		
-	
+
+
 pedecoordenadas endp ;------>PEDE as coordenadas para o play2<------
 
 
@@ -2338,13 +2338,31 @@ DIREITA:
 TEMPOTOTAL:
   ; Mostra no ecrã
   call apaga_ecran
-  goto_xy 35,11
+  goto_xy 32,11
   mostra strTEMPOTOTAL ; String fixa TEMPOTOTAL
-  mov bl, tempopartida
-  add bl, 48
-  mov strtempopartida, bl
-  goto_xy 40,12
-  mostra strtempopartida
+
+  ; monta o cornometro
+  goto_xy 37,12
+  mostra strzero
+
+  goto_xy 36,12
+  mostra strzero
+
+  goto_xy 35,12
+  mostra strdoispontos
+
+  goto_xy 34,12
+  mostra strzero
+
+  goto_xy 33,12
+  mostra strzero
+
+  ;mov bl, tempopartida
+  ;add bl, 48
+  ;mov strtempopartida, bl
+  ;goto_xy 40,12
+  ;mostra strtempopartida
+
   call 	LE_TECLA
   cmp 	al, 27	; ESCAPE
     ret
@@ -2492,7 +2510,7 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   		jne bonus
   	call menuconfig
   	jmp inicio
-	
+
 	bonus:
 		cmp posy, 21 ; se o 'x' estiver no maze config
   		jne estend
@@ -2572,8 +2590,8 @@ menubonus proc ;##########################----bonus---##########################
 		;inc si
 		;inc di
 		;jmp strcpy2
-  
-  
+
+
 openmaze:
 mov mazedim, 0
   goto_xy 0,0
@@ -2634,35 +2652,35 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 
 	;procuar o I no maze e substituir pelo avatar-----------------------------------------------
 	mov ax, 0B800h  ;memoria de video
-	mov es, ax  
-	
+	mov es, ax
+
 	mov cx, 20*80 ;  20 altura * 80 largura
 	mov si, 80*2 ;começa na linha 1
-	
+
 	procuraI:
 		mov bx, es:[si]
 		add si, 2
 		cmp bl, 73 ; I
-			loopne procuraI 
+			loopne procuraI
 		sub si, 2
 		mov bl, 233 ;avatar
 		mov es:[si], bx
-		
+
 		xor ax, ax
 		mov ax, si
 		mov bl, 160 ;imediat operand not allowed
 		div bl
 		mov mazey, al  ; o quociente é o y
 		mov mazex, ah  ; o resto é o x
-		
-	;---------------------------------------------------------------------------	
+
+	;---------------------------------------------------------------------------
 		dec mazex
-	
+
 
   ;imput das coordenadas--------------------------------------------------------------------------------------------------------------------
 	call pedecoordenadas
-	
-  
+
+
 	xor si, si
 	verpassos:
 			mov di, si
@@ -2689,7 +2707,7 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 		quatro:
 			mov cx, 4  		;cx vai conter o nr de passos a dar
 			mov di, si       ;repor o di antes de ver a direcao
-		
+
 		verdirecao:
 			cmp coordenadas[di], 48 ;0
 				jne este
@@ -2699,8 +2717,8 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 			movernorte:
 				dec mazey
 				goto_xy	MazeX, MazeY
-				
-				getchar1:	
+
+				getchar1:
 					call 	le_tecla
 					cmp 	al, 27	 ; escape
 						je fim
@@ -2726,15 +2744,15 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 			movereste:
 				inc mazex
 				goto_xy	mazex,mazey
-				
-			
+
+
 			getchar3:
 						call 	le_tecla
 						cmp 	al, 27	 ; escape
 							je fim
 						cmp 	al, 13	 ; enter
 							jne		getchar3
-	
+
 			loop movereste
 			jmp incrementar
 		moveroeste:
@@ -2747,17 +2765,17 @@ fecha_ficheiro:					; vamos fechar o ficheiro
 					cmp 	al, 13	 ; enter
 						jne		getchar4
 			loop moveroeste
-		
+
 	incrementar:
-		
-		
+
+
 		add si, 4
 		cmp coordenadas[si], 0
 			jne verpassos
-		
-			
-			
-			
+
+
+
+
 fim:
 	mov		ah,4CH
 	int		21H
