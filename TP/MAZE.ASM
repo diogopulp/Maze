@@ -43,6 +43,9 @@ coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
   MazeX            db    1
   MazeY            db    1
 
+  FimX  db 1
+  FimY  db 1
+
   ;------------------VARIAVEIS DO MAZE1----------------------
   chIn db 65
   oitoch db 1
@@ -75,6 +78,8 @@ coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
   msgErrorCreate	db	"Ocorreu um erro na criacao do ficheiro!$"
   msgErrorWrite	db	"Ocorreu um erro na escrita para ficheiro!$"
   msgErrorClose	db	"Ocorreu um erro no fecho do ficheiro!$"
+
+
 
 
   Buffer db 2000 dup(0) ; Inicializa um array de 2000 posições(80*25) a 0 para depois serem gravados no ficheiro
@@ -113,6 +118,9 @@ coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
 
   strzero db "0$"
   strdoispontos db ":$"
+
+  cenas1 db "     $"
+  cenas2 db "     $"
 
 dseg    ends
 
@@ -1778,8 +1786,6 @@ menuDeleteMaze proc   ;##########################----apagar labirintos---#######
 
 menuDeleteMaze endp   ;##########################----apagar labirintos---####################################
 
-
-
 MENUCONFIG PROC  ;##########################----MENU DE CONFIGURACAO---####################################
 inicio:
 	mov posx, 25 ;colocar o x no sitio onde vai aparece os menus
@@ -2074,20 +2080,21 @@ fecha_ficheiro:					; vamos fechar o ficheiro
   mov		Car, al	; Guarda o Caracter que est� na posi��o do Cursor
   mov		Cor, ah	; Guarda a cor que est� na posi��o do Cursor
 
-;procuar o I no maze e substituir pelo avatar-----------------------------------------------
+;procura o I e o F no maze e substitui por espaço-----------------------------------------------
 	mov ax, 0B800h  ;memoria de video
 	mov es, ax
 
-  mov cx, 20*80 ;  20 altura * 80 largura
-  mov si, 80*2 ;come�a na linha 1
+  mov cx, 20*80   ; 20 altura * 80 largura
+  mov si, 80*2    ; come�a na linha 1
 
-procuraI:
-	mov bx, es:[si]
+procuraF:
+	mov bx, es:[si] ;memoria de video
   add si, 2
-  cmp bl, 73 ; I
-    loopne procuraI
+
+  cmp bl, 70 ; F
+    loopne procuraF
   sub si, 2
-  mov bl, 233 ;avatar
+  mov bl, 20h ;substitui por espaço em branco
   mov es:[si], bx
 
   mov ax, si
@@ -2095,6 +2102,23 @@ procuraI:
   div bl
   mov mazey, al  ; o quociente � o y
   mov mazex, ah  ; o resto � o x
+
+procuraI:
+	mov bx, es:[si]
+  add si, 2
+  cmp bl, 73 ; I
+    loopne procuraI
+  sub si, 2
+  mov bl, 20h ;substitui por espaço em branco
+  mov es:[si], bx
+
+  mov ax, si
+  mov bl, 160 ;imediat operand not allowed
+  div bl
+  mov mazey, al  ; o quociente � o y
+  mov mazex, ah  ; o resto � o x
+
+
 ;---------------------------------------------------------------------------
 
   ; monta o cornometro
@@ -2129,11 +2153,15 @@ notup:
 		jne notleft
 	mov mazex, 40
 notleft:
-	cmp mazex, 41
+	cmp mazex, 42
 		jne notright
 	mov mazex, 1
 notright:
-	goto_xy	mazex,mazey
+  goto_xy	mazex,mazey
+
+  cmp mazex, 41 ; deteta o fim do labirinto
+    je TEMPOTOTAL
+
 ;*****************************************************
 
   goto_xy	POSxa,POSya	; Vai para a posi��o anterior do cursor
@@ -2245,13 +2273,6 @@ mostrazero1:
   ; monta o cornometro
   goto_xy 39,12
   mostra strsegundos1       ; primeira posicao tem sempre algum caracter
-
-
-
-
-
-
-
 
   call 	LE_TECLA
   cmp 	al, 27	; ESCAPE
