@@ -288,115 +288,6 @@ fim_horas:
 
 Trata_Horas ENDP
 
-teclanum  proc
-		mov	ax, dseg
-		mov	ds,ax
-		mov	ax,0B800h
-		mov	es,ax		; es é ponteiro para mem video
-
-NOVON:
-		mov		NUMDIG, 0			; inícia leitura de novo número
-		mov		cx, 20
-		XOR		BX,BX
-LIMPA_N:
-		mov		NUMERO[bx], ' '
-		inc		bx
-		loop 	LIMPA_N
-
-		mov		al, 20
-		mov		POSx,al
-		mov		al, 10
-		mov		POSy,al				; (POSx,POSy) é posição do cursor
-		goto_xy	POSx,POSy
-		;MOSTRA	NUM_SP
-
-CICLO:	goto_xy	POSx,POSy
-
-
-		call 	LE_TECLA		; lê uma nova tecla
-		cmp		ah,1			; verifica se é tecla extendida
-		je		ESTEND
-		CMP 	AL,27			; caso seja tecla ESCAPE sai do programa
-		JE		FIM
-		CMP 	AL,13			; Pressionando ENTER vai para OKNUM
-		JE		OKNUM
-		CMP 	AL,8			; Teste BACK SPACE <- (apagar digito)
-		JNE		NOBACK
-		mov		bl,NUMDIG		; Se Pressionou BACK SPACE
-		CMP		bl,0			; Verifica se não tem digitos no numero
-		JE		NOBACK			; se não tem digitos continua então não apaga e salta para NOBACK
-
-		dec		NUMDIG			; Retira um digito (BACK SPACE)
-		dec		POSx			; Retira um digito
-
-		xor		bx,bx
-		mov		bl, NUMDIG
-		mov		NUMERO[bx],' '	; Retira um digito
-		goto_xy	POSx,POSy
-		mov		ah,02h			; imprime SPACE na possicão do cursor
-		mov		dl,32			; que equivale a colocar SPACE
-		int		21H
-
-NOBACK:
-		CMP		AL,30h			; se for menor que tecla do ZERO
-		jb		CICLO
-		CMP		AL,39h			; ou se for maior que tecla do NOVE
-		ja		CICLO			; é rejeitado e vai buscar nova tecla
-
-		mov		bl,MAXDIG		; se atigido numero máximo de digitos ?
-		CMP		bl,NUMDIG
-		jbe		CICLO			; não aceita mais digitos
-		xor		Bx, Bx			; caso contrario coloca digito na matriz NUMERO
-		mov		bl, NUMDIG
-		MOV		NUMERO[bx], al
-		mov		ah,02h			; imprime digito
-		mov		dl,al			; na possicão do cursor
-		int		21H
-
-		inc		POSx			; avança o cursor e
-		inc		NUMDIG			; incrementa o numero de digitos
-
-ESTEND:	jmp	CICLO			; Tecla extendida não é tratada neste programa
-
-OKNUM:	goto_xy	20,16
-		;MOSTRA	NUM_SP
-		goto_xy	20,16
-		xor		bx,bx
-		mov		bl, NUMDIG
-		inc 	bl
-		MOV		NUMERO[bx], '$'
-		;MOSTRA	NUMERO
-		jmp		NOVON		; Vai ler novo numero
-
-fim:	ret
-
-teclanum ENDP
-
-;APAGA_ECRAN	PROC  ; ------>LIMPA O ECRA<------
-  ;push bx
-	;push ax
-	;push cx
-  ;push si
-  ;xor bx,bx
-	;mov cx,24*80
-	;mov bx,160
-  ;mov si,bx
-;apaga:
-	;mov	al,' '
-  ;mov byte ptr es:[bx],al
-	;mov byte ptr es:[bx+1],7
-	;inc bx
-	;inc bx
-	;inc si
-	;loop apaga
-	;pop si
-	;pop cx
-	;pop ax
-	;pop bx
-	;ret
-;APAGA_ECRAN ENDP  ; ------>LIMPA O ECRA<------
-
-
 GUARDA_ECRA PROC   ; ------>GUARDA ECRA NO BUFFER<------
 		xor bx,bx
 		xor si,si
@@ -422,7 +313,7 @@ LE_TECLA	PROC   ; ------>LE UMA TECLA<------
 	int		21h
 	mov		ah,0
 	cmp		al,0
-	jne		SAI_TECLA
+	 jne		SAI_TECLA
 	mov		ah, 08h
 	int		21h
 	mov		ah,1
@@ -434,26 +325,26 @@ LE_TECLA	ENDP   ; ------>LE UMA TECLA<------
 
 LE_TECLA_CLOCK	PROC   ; ------>LE UMA TECLA CLOCK<------
 
-  sem_tecla:
-  		call Trata_Horas
-  		mov	ah,0BH
-  		int 21h
-  		cmp al,0
-  		je	sem_tecla
+sem_tecla:
+	call Trata_Horas
+	mov	ah,0BH
+	int 21h
+	cmp al,0
+	je	sem_tecla
 
-  		goto_xy	POSx,POSy
+	goto_xy	POSx,POSy
 
-  		mov	ah,08H
-  		int	21H
-  		mov	ah,0
-  		cmp	al,0
-  		  jne	SAI_TECLA
-  		mov	ah, 08H
-  		int	21H
-  		mov	ah,1
+	mov	ah,08H
+	int	21H
+	mov	ah,0
+	cmp	al,0
+	  jne	SAI_TECLA
+	mov	ah, 08H
+	int	21H
+	mov	ah,1
 
-  sai_tecla:
-    ret
+sai_tecla:
+  ret
 
 LE_TECLA_CLOCK	ENDP   ; ------>LE UMA TECLA<------
 
@@ -680,11 +571,6 @@ DIREITA:
 	jmp		CICLO
 edit_ficheiro endp ; ------>edita UM FICHEIRO<------
 
-
-
-
-
-
 cria_ficheiro2 proc ; ------>CRIA UM FICHEIRO para o edit<------
 	mov	ah, 3ch			; abrir ficheiro para escrita
 	mov	cx, 00H			; tipo de ficheiro
@@ -771,6 +657,7 @@ close:
 	int	21h
 
 CRIA_FICHEIRO ENDP  ; ----------->cria um ficheiro<---------------------
+
 
 
 pedecoordenadas proc ;------>PEDE as coordenadas para o play2<------
@@ -862,9 +749,6 @@ scanf:
 		
 	
 pedecoordenadas endp ;------>PEDE as coordenadas para o play2<------
-
-
-
 
 
 fnameptrToFich proc  ; ----------->passa o ptr para o ultimo elemento do array com os labirintos para um ficheiro<---------------------
@@ -1070,8 +954,6 @@ sai:
   ret
 
 fichTofnamen endp ; ----------->passa o nr de elementos do array com os nomes dos mazes para o fnamen<---------------------
-
-
 
 
 fichTofnameptr proc ; ----------->passa o ptr para o ultimo elemento do array com os nomes dos mazes para o fnamen<---------------------
@@ -2893,7 +2775,6 @@ MAIN PROC ;###############################----MAIN---###########################
 	call fichTofnamen
 	call fichTofnameptr
 	call MENU
-  ;;call teclanum
 
 MAIN  ENDP ;###############################----MAIN---########################################
 CSEG ENDS
