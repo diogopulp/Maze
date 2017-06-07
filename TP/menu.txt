@@ -20,5 +20,6 @@
 				[ ]Top 10
 				[ ]Maze Config
 				[ ]Exit
+				[ ]Bonus
 
 
