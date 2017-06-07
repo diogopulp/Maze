@@ -2393,10 +2393,7 @@ MENU PROC ;##########################----MENU PRINCIPAL---######################
   	call menuconfig
   	jmp inicio
 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/diogo
 	bonus:
 		cmp posy, 22 ; se o 'x' estiver no maze config
 			jne estend
