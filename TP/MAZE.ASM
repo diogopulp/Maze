@@ -97,9 +97,7 @@ coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
   NUMDIG	db	0	; controla o numero de digitos do numero lido
   MAXDIG	db	4	; Constante que define o numero MAXIMO de digitos a ser aceite
 
-  tempopartida db 0 ; cornometro da partida
   strTEMPOTOTAL db "Tempo Total:$"
-  strtempopartida db "     $"; string para ser impressa
 
   segundos1 db 47; contador de segundos
   segundos2 db 48; contador de segundos pos2
@@ -107,11 +105,11 @@ coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
   minutos1 db 48; contador de minutos
   minutos2 db 48; contador de inutos pos2
 
-  strsegundos1 db "     $" ;string para ser impressa
-  strsegundos2 db "     $" ;string para ser impressa
+  strsegundos1 db "      $" ;string para ser impressa
+  strsegundos2 db "      $" ;string para ser impressa
 
-  strminutos1 db "     $" ;string para ser impressa
-  strminutos2 db "     $" ;string para ser impressa
+  strminutos1 db "       $" ;string para ser impressa
+  strminutos2 db "       $" ;string para ser impressa
 
   strzero db "0$"
   strdoispontos db ":$"
@@ -148,7 +146,6 @@ ENDM
 apaga_ecran	proc
 		xor		bx,bx
 		mov		cx,25*80
-
 
 apaga:
 		mov		byte ptr es:[bx],' '
@@ -216,9 +213,6 @@ Trata_Horas PROC
   mov	Old_seg, ax			; Se segundos são diferentes actualiza informação do tempo
 
 contasegundos:
-
-  inc tempopartida ; tempo total de cada partida em segundos
-
   inc segundos1
   cmp segundos1, 58
     je contasegundos2
@@ -460,9 +454,6 @@ scanf:
 		jmp tryagainmin
 
 PEDENOMEF ENDP ; ------>PEDE NOME PARA SER ATRIBUIDO AO FICHEIRO<------
-
-
-
 
 pedecoordenadas proc ;------>PEDE as coordenadas para o play2<------
 
@@ -2122,8 +2113,6 @@ procuraI:
   goto_xy 64,1
   mostra strzero
 
-  mov tempopartida, 0 ; Inicializa a variavel tempopartida para um novo jogo
-
 CICLO:
 ;***********************************************************
 	cmp mazey, 21
@@ -2223,27 +2212,46 @@ TEMPOTOTAL:
   goto_xy 32,11
   mostra strTEMPOTOTAL ; String fixa TEMPOTOTAL
 
-  ; monta o cornometro
-  goto_xy 37,12
+  goto_xy 35,12
+  mov ah, ' '
+  cmp strminutos2, ah
+    je mostrazero3
+  mostra strminutos2
+
+mostrazero3:
   mostra strzero
 
   goto_xy 36,12
+  mov ah, ' '
+  cmp strminutos1, ah
+    je mostrazero2
+  mostra strminutos1
+
+mostrazero2:
   mostra strzero
 
-  goto_xy 35,12
-  mostra strdoispontos
+  goto_xy 37,12
+  mostra strdoispontos      ; mostra separador ':'
 
-  goto_xy 34,12
-  mostra strzero
+  goto_xy 38,12             ; segunda posicao pode estar vazia
+  mov ah, ' '
+  cmp strsegundos2, ah      ; se estiver vazia tem de ser comparada para mostrar o caracter '0'
+    je mostrazero1
+  mostra strsegundos2
 
-  goto_xy 33,12
-  mostra strzero
+mostrazero1:
+    mostra strzero
 
-  ;mov bl, tempopartida
-  ;add bl, 48
-  ;mov strtempopartida, bl
-  ;goto_xy 40,12
-  ;mostra strtempopartida
+  ; monta o cornometro
+  goto_xy 39,12
+  mostra strsegundos1       ; primeira posicao tem sempre algum caracter
+
+
+
+
+
+
+
 
   call 	LE_TECLA
   cmp 	al, 27	; ESCAPE
