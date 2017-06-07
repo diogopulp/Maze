@@ -19,7 +19,6 @@ dseg    segment para public 'data'
 coordenadas db 600 dup(?) ;variavel para guardar as cooredenadas do play 2
   mazedim dw 0 ;dimensao do labirinto, para imprimir
   FichDefaultMaze  db    'maze.txt',0
-  FichMazeUser db '',0
   fnameptrFich db 'mnamespf.txt',0 ;nome do ficheiro que contem o ponteiro para o ultimo elemento do array com os nomes dos labirintos
   fnamenFich db 'mnamesnf.txt',0 ;nome do ficheiro que contem o n de elementos do array com os nomes dos labirintos
   mazeNamesFich db 'mnamesf.txt',0 ;nome do ficheiro que contem os nomes dos labirintos
